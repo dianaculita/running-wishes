@@ -15,18 +15,15 @@ import java.util.List;
 public class Sport {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "sport_id")
     private Long sportId;
 
     @Column(name = "sport_name")
     private String name;
 
-    @Column(name = "donation_amount") // each sport has a price (€) for donation per 500 burned calories
-    private Long donation;
-
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "sport_id")
-    private List<UserPracticesSport> sportPracticedByUsers;
+    private List<Competition> competitions;
 
 }

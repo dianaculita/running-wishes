@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "USERS", uniqueConstraints = { @UniqueConstraint(columnNames = { "sport_name" }) })
+@Table(name = "USERS")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -16,7 +16,7 @@ public class User {
 
     @Id
     @Column(name = "user_cnp")
-    private Long cnp;
+    private String cnp;
 
     @Column(name = "name")
     private String name;
@@ -27,12 +27,12 @@ public class User {
     @Column(name = "gender")
     private Character gender;
 
-    @OneToMany
-    @JoinColumn(name = "user_cnp")
-    private List<UserPracticesSport> userPracticesSports;
-
-    @OneToMany
-    @JoinColumn(name = "user_cnp")
-    private List<Donation> donations;
+    @ManyToMany
+    @JoinTable(
+            name = "participates_to",
+            joinColumns = @JoinColumn(name = "user_cnp"),
+            inverseJoinColumns = @JoinColumn(name = "competition_id")
+    )
+    private List<Competition> participatesToCompetitions;
 
 }
