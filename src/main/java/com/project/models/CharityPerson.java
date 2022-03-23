@@ -16,7 +16,7 @@ public class CharityPerson {
 
     @Id
     @Column(name = "person_cnp")
-    private Long personCnp;
+    private String personCnp;
 
     @Column(name = "name")
     private String name;

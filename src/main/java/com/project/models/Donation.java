@@ -14,17 +14,17 @@ import javax.persistence.*;
 public class Donation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "donation_id")
     private Long donationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_cnp", nullable = false)
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "person_cnp", nullable = false)
     private CharityPerson charityPerson;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sponsor_id", nullable = false)
+    private Sponsor sponsor;
 
     @Column(name = "total_funds")
     private Long totalFunds;

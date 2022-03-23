@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "ASSOCIATIONS")
+@Table(name = "ASSOCIATIONS", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }) })
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -15,7 +15,7 @@ import java.util.List;
 public class Association {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "association_id")
     private Long associationId;
 
