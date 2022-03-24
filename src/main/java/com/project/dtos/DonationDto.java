@@ -13,7 +13,7 @@ public class DonationDto {
 
     private String charityPersonCnp;
 
-    private Long sponsorId;
+    private Long competitionId;
 
-    private Long totalFunds;
+    private Double totalFunds;
 }

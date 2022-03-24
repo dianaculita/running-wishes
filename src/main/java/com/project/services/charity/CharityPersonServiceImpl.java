@@ -7,7 +7,6 @@ import com.project.models.Association;
 import com.project.models.CharityPerson;
 import com.project.repositories.CharityPersonRepository;
 import com.project.services.association.AssociationService;
-import com.project.services.donation.DonationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -41,6 +40,13 @@ public class CharityPersonServiceImpl implements CharityPersonService {
     }
 
     @Override
+    public List<CharityPersonDto> getAllCharityPersons() {
+        return charityPersonRepository.findAll().stream()
+                .map(ModelToDto::charityPersonToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public String createNewCharityPerson(CharityPersonDto charityPersonDto) {
         CharityPerson charityPerson = CharityPerson.builder()
                 .personCnp(charityPersonDto.getPersonCnp())
@@ -49,6 +55,8 @@ public class CharityPersonServiceImpl implements CharityPersonService {
                 .gender(charityPersonDto.getGender())
                 .story(charityPersonDto.getStory())
                 .iban(charityPersonDto.getIban())
+                .neededFund(charityPersonDto.getNeededFund())
+                .raisedFund(charityPersonDto.getRaisedFund())
                 .association(getAssociation(charityPersonDto))
                 .build();
 
@@ -68,6 +76,8 @@ public class CharityPersonServiceImpl implements CharityPersonService {
         charityPerson.setGender(charityPersonDto.getGender());
         charityPerson.setIban(charityPersonDto.getIban());
         charityPerson.setStory(charityPersonDto.getStory());
+        charityPerson.setRaisedFund(charityPersonDto.getRaisedFund());
+        charityPerson.setNeededFund(charityPersonDto.getNeededFund());
         charityPerson.setAssociation(getAssociation(charityPersonDto));
 
         charityPersonRepository.save(charityPerson);
@@ -76,13 +86,6 @@ public class CharityPersonServiceImpl implements CharityPersonService {
     @Override
     public void deleteCharityPerson(String cnp) {
         charityPersonRepository.delete(getByCnp(cnp));
-    }
-
-    @Override
-    public List<CharityPersonDto> getAllCharityPersons() {
-        return charityPersonRepository.findAll().stream()
-                .map(ModelToDto::charityPersonToDto)
-                .collect(Collectors.toList());
     }
 
 }

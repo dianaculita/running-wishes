@@ -19,6 +19,8 @@ public class DtoToModel {
                 .gender(charityPersonDto.getGender())
                 .iban(charityPersonDto.getIban())
                 .story(charityPersonDto.getStory())
+                .neededFund(charityPersonDto.getNeededFund())
+                .raisedFund(charityPersonDto.getRaisedFund())
                 .build();
     }
 
@@ -51,6 +53,8 @@ public class DtoToModel {
                 .name(competitionDto.getName())
                 .location(competitionDto.getLocation())
                 .numberOfDays(competitionDto.getNumberOfDays())
+                .ticketFee(competitionDto.getTicketFee())
+                .raisedMoney(competitionDto.getRaisedMoney())
                 .build();
     }
 

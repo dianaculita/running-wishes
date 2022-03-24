@@ -55,6 +55,8 @@ public class UserServiceImpl implements UserService {
                 .participatesToCompetitions(participatesToCompetitions(userDto.getCompetitionsIds()))
                 .build();
 
+        updateCompetitionsFundraisingBudget(userDto.getCompetitionsIds());
+
         return userRepository.save(user).getCnp();
     }
 
@@ -62,6 +64,21 @@ public class UserServiceImpl implements UserService {
         return competitionRepository.findByCompetitionIdIn(ids);
     }
 
+    private void updateCompetitionsFundraisingBudget(List<Long> competitions) {
+        for (Long competitionId : competitions) {
+            Competition competition = competitionRepository.getById(competitionId);
+
+            Double existingFunds = competition.getRaisedMoney();
+            competition.setRaisedMoney(existingFunds + competition.getTicketFee());
+
+            competitionRepository.save(competition);
+        }
+    }
+
+    /*
+        the user can update his participation to competitions only by adding more competitions, meaning
+        that the already bought ticket is non-refundable and the user can not withdraw from a competition
+     */
     @Override
     public void updateUser(UserDto userDto) {
         User user = getByCnp(userDto.getCnp());

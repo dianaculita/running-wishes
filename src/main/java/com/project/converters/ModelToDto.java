@@ -24,6 +24,8 @@ public class ModelToDto {
                 .gender(charityPerson.getGender())
                 .iban(charityPerson.getIban())
                 .story(charityPerson.getStory())
+                .neededFund(charityPerson.getNeededFund())
+                .raisedFund(charityPerson.getRaisedFund())
                 .associationId(charityPerson.getAssociation().getAssociationId())
                 .build();
     }
@@ -45,6 +47,8 @@ public class ModelToDto {
                 .name(competition.getName())
                 .location(competition.getLocation())
                 .numberOfDays(competition.getNumberOfDays())
+                .ticketFee(competition.getTicketFee())
+                .raisedMoney(competition.getRaisedMoney())
                 .sportId(competition.getSport().getSportId())
                 .usersCnp(participants)
                 .build();
@@ -69,15 +73,10 @@ public class ModelToDto {
                 .map(Competition::getCompetitionId)
                 .collect(Collectors.toList());
 
-        List<Long> donationsIds = sponsor.getDonations().stream()
-                .map(Donation::getDonationId)
-                .collect(Collectors.toList());
-
         return SponsorDto.builder()
                 .sponsorId(sponsor.getSponsorId())
                 .name(sponsor.getName())
                 .competitionsIds(competitionsIds)
-                .donationsIds(donationsIds)
                 .build();
     }
 
@@ -85,7 +84,7 @@ public class ModelToDto {
         return DonationDto.builder()
                 .donationId(donation.getDonationId())
                 .charityPersonCnp(donation.getCharityPerson().getPersonCnp())
-                .sponsorId(donation.getSponsor().getSponsorId())
+                .competitionId(donation.getCompetition().getCompetitionId())
                 .totalFunds(donation.getTotalFunds())
                 .build();
     }

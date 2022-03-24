@@ -22,4 +22,8 @@ public class CharityPersonDto {
     private Long iban;
 
     private Long associationId;
+
+    private Double neededFund;
+
+    private Double raisedFund;
 }
