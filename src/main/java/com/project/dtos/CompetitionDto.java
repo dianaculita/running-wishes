@@ -21,5 +21,9 @@ public class CompetitionDto {
 
     private Long sportId;
 
+    private Double ticketFee;
+
+    private Double raisedMoney;
+
     private List<String> usersCnp;
 }

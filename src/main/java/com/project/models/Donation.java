@@ -23,10 +23,10 @@ public class Donation {
     private CharityPerson charityPerson;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sponsor_id", nullable = false)
-    private Sponsor sponsor;
+    @JoinColumn(name = "competition_id", nullable = false)
+    private Competition competition;
 
     @Column(name = "total_funds")
-    private Long totalFunds;
+    private Double totalFunds;
 
 }

@@ -15,8 +15,8 @@ public class SponsorDto {
 
     private String name;
 
-    private List<Long> competitionsIds;
+    private Double sponsoringFunds;
 
-    private List<Long> donationsIds;
+    private List<Long> competitionsIds;
 
 }

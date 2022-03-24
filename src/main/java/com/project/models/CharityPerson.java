@@ -33,6 +33,12 @@ public class CharityPerson {
     @Column(name = "iban")
     private Long iban;
 
+    @Column(name = "needed_fund")
+    private Double neededFund;
+
+    @Column(name = "raised_fund")
+    private Double raisedFund;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "association_id", nullable = false)
     private Association association;

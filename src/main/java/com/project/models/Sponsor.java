@@ -22,10 +22,10 @@ public class Sponsor {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "sponsoring_funds")
+    private Double sponsoringFunds;
+
     @ManyToMany(mappedBy = "sponsors")
     private List<Competition> competitions;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sponsor_id")
-    private List<Donation> donations;
 }

@@ -28,12 +28,22 @@ public class Competition {
     @Column(name = "location")
     private String location;
 
+    @Column(name = "ticket_fee")
+    private Double ticketFee;
+
+    @Column(name = "raised_money")
+    private Double raisedMoney;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sport_id", nullable = false)
     private Sport sport;
 
     @ManyToMany(mappedBy = "participatesToCompetitions")
     private List<User> users;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "competition_id")
+    private List<Donation> donations;
 
     @ManyToMany
     @JoinTable(

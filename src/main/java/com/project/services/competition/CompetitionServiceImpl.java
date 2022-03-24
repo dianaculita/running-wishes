@@ -52,6 +52,8 @@ public class CompetitionServiceImpl implements CompetitionService {
                 .name(competitionDto.getName())
                 .location(competitionDto.getLocation())
                 .numberOfDays(competitionDto.getNumberOfDays())
+                .ticketFee(competitionDto.getTicketFee())
+                .raisedMoney(0.0)
                 .sport(getSport(competitionDto))
                 .build();
 
@@ -62,14 +64,16 @@ public class CompetitionServiceImpl implements CompetitionService {
         return DtoToModel.fromSportDto(sportService.getSportById(competitionDto.getSportId()));
     }
 
+    /*
+        once a competition has been created, the ticket fee or practiced sport can not be changed, only
+        the location or name
+     */
     @Override
     public void updateCompetition(CompetitionDto competitionDto) {
         Competition competition = getById(competitionDto.getCompetitionId());
 
         competition.setName(competitionDto.getName());
         competition.setLocation(competitionDto.getLocation());
-        competition.setNumberOfDays(competitionDto.getNumberOfDays());
-        competition.setSport(getSport(competitionDto));
 
         competitionRepository.save(competition);
     }

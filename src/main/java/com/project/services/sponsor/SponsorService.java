@@ -1,7 +1,6 @@
 package com.project.services.sponsor;
 
 import com.project.dtos.SponsorDto;
-import com.project.dtos.UserDto;
 
 import java.util.List;
 
