@@ -1,4 +1,4 @@
-# running-wishes
+# Running Wishes
 
 Running Wishes is a unique fundraising application meant to encourage sport practicing. The purpose of the application is to raise money for charity cases, 
 for example for children with special needs that are part of an association. 
