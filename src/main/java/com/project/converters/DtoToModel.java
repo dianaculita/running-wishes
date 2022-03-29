@@ -31,12 +31,12 @@ public class DtoToModel {
                 .build();
     }
 
-    public static User fromUserDto(UserDto userDto) {
-        return User.builder()
-                .cnp(userDto.getCnp())
-                .name(userDto.getName())
-                .age(userDto.getAge())
-                .gender(userDto.getGender())
+    public static Participant fromParticipantDto(ParticipantDto participantDto) {
+        return Participant.builder()
+                .cnp(participantDto.getCnp())
+                .name(participantDto.getName())
+                .age(participantDto.getAge())
+                .gender(participantDto.getGender())
                 .build();
     }
 

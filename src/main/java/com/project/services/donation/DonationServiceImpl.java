@@ -61,10 +61,11 @@ public class DonationServiceImpl implements DonationService {
     @Override
     public Long createNewDonation(DonationDto donationDto) {
         CharityPerson needingPerson = getTheMostNeedingPerson();
-        Double totalFunds = calculateTotalFunds(getCompetition(donationDto));
+        Competition competition = getCompetition(donationDto);
+        Double totalFunds = calculateTotalFunds(competition);
 
         Donation donation = Donation.builder()
-                .competition(getCompetition(donationDto))
+                .competition(competition)
                 .charityPerson(needingPerson)
                 .totalFunds(totalFunds)
                 .build();
@@ -94,7 +95,7 @@ public class DonationServiceImpl implements DonationService {
         the donation will be extracted from the actual competition donation funds
      */
     private Double calculateTotalFunds(Competition competition) {
-        Double donationAmount = 0.1 * competition.getRaisedMoney();
+        Double donationAmount = 0.02 * competition.getRaisedMoney();
 
         if (competition.getRaisedMoney() > donationAmount) {
             updateCompetitionFundraisingBudget(competition.getCompetitionId(),

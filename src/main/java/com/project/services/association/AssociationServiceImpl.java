@@ -27,6 +27,11 @@ public class AssociationServiceImpl implements AssociationService {
         return ModelToDto.associationToDto(getById(id));
     }
 
+    private Association getById(Long id) {
+        return associationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
     @Override
     public List<AssociationDto> getAllAssociations() {
         return associationRepository.findAll().stream()
@@ -59,8 +64,4 @@ public class AssociationServiceImpl implements AssociationService {
         associationRepository.delete(getById(id));
     }
 
-    private Association getById(Long id) {
-        return associationRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
 }

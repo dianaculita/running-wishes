@@ -3,7 +3,6 @@ package com.project.models;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "USERS")
@@ -15,24 +14,11 @@ import java.util.List;
 public class User {
 
     @Id
-    @Column(name = "user_cnp")
-    private String cnp;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
 
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "age")
-    private Integer age;
-
-    @Column(name = "gender")
-    private Character gender;
-
-    @ManyToMany
-    @JoinTable(
-            name = "participates_to",
-            joinColumns = @JoinColumn(name = "user_cnp"),
-            inverseJoinColumns = @JoinColumn(name = "competition_id")
-    )
-    private List<Competition> participatesToCompetitions;
+    @Column(name = "username")
+    private String username;
 
 }

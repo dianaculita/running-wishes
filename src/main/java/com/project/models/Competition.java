@@ -39,7 +39,7 @@ public class Competition {
     private Sport sport;
 
     @ManyToMany(mappedBy = "participatesToCompetitions")
-    private List<User> users;
+    private List<Participant> participants;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "competition_id")
