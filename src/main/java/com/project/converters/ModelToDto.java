@@ -38,8 +38,8 @@ public class ModelToDto {
     }
 
     public static CompetitionDto competitionToDto(Competition competition) {
-        List<String> participants = competition.getUsers().stream()
-                .map(User::getCnp)
+        List<String> participants = competition.getParticipants().stream()
+                .map(Participant::getCnp)
                 .collect(Collectors.toList());
 
         return CompetitionDto.builder()
@@ -54,16 +54,16 @@ public class ModelToDto {
                 .build();
     }
 
-    public static UserDto userToDto(User user) {
-        List<Long> competitionsIds = user.getParticipatesToCompetitions().stream()
+    public static ParticipantDto participantToDto(Participant participant) {
+        List<Long> competitionsIds = participant.getParticipatesToCompetitions().stream()
                 .map(Competition::getCompetitionId)
                 .collect(Collectors.toList());
 
-        return UserDto.builder()
-                .cnp(user.getCnp())
-                .name(user.getName())
-                .age(user.getAge())
-                .gender(user.getGender())
+        return ParticipantDto.builder()
+                .cnp(participant.getCnp())
+                .name(participant.getName())
+                .age(participant.getAge())
+                .gender(participant.getGender())
                 .competitionsIds(competitionsIds)
                 .build();
     }

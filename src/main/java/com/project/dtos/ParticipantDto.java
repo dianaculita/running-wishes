@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class UserDto {
+public class ParticipantDto {
 
     private String cnp;
 
