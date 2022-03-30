@@ -54,10 +54,10 @@ public class MyKeycloakConfiguration extends KeycloakWebSecurityConfigurerAdapte
         super.configure(http);
         http.cors().and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/user/register-user", "/login", "/refresh").permitAll()
-                .antMatchers("/participant").hasRole("USER")
-                .antMatchers("/competition", "/sport", "/sponsor", "/donation",
-                        "/charity", "/association").hasRole("ADMIN")
+                .antMatchers("/user/*", "/login", "/refresh").permitAll()
+                .antMatchers("/participant", "/participant/*").hasRole("USER")
+                .antMatchers("/competition/*", "/sport/*", "/sponsor/*", "/donation/*",
+                        "/charity/*", "/association/*").hasRole("ADMIN")
                 .anyRequest().authenticated();
     }
 }

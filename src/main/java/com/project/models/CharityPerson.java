@@ -43,7 +43,7 @@ public class CharityPerson {
     @JoinColumn(name = "association_id", nullable = false)
     private Association association;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
     @JoinColumn(name = "person_cnp")
     private List<Donation> donations;
 

@@ -25,7 +25,7 @@ public class Association {
     @Column(name = "purpose")
     private String purpose;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
     @JoinColumn(name = "association_id")
     private List<CharityPerson> charityPeople;
 

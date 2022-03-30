@@ -1,8 +1,10 @@
 package com.project.services.auth;
 
+import com.project.dtos.auth.ChangePasswordDto;
 import com.project.dtos.auth.RegisterUserDto;
 import com.project.dtos.auth.TokenDto;
 import com.project.exceptions.UserAlreadyExistsException;
+import com.project.exceptions.UserNotFoundException;
 import com.project.models.User;
 import com.project.repositories.auth.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,5 +36,14 @@ public class UserServiceImpl implements UserService {
         Long userId = userRepository.save(user).getId();
 
         return keycloakAdminService.addUserToKeycloak(userId, registerUserDto.getPassword(), registerUserDto.getRole());
+    }
+
+    @Override
+    public void changePassword(ChangePasswordDto changePasswordDto) {
+        if(!userRepository.existsByUsername(changePasswordDto.getUsername())) {
+            throw new UserNotFoundException();
+        }
+
+        keycloakAdminService.changePassword(changePasswordDto);
     }
 }

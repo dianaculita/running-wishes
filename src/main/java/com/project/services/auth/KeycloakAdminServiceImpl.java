@@ -1,7 +1,9 @@
 package com.project.services.auth;
 
 import com.project.clients.AuthenticationClient;
+import com.project.dtos.auth.ChangePasswordDto;
 import com.project.dtos.auth.TokenDto;
+import com.project.models.User;
 import com.project.repositories.auth.UserRepository;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -12,9 +14,11 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.WebApplicationException;
@@ -90,7 +94,26 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             e.printStackTrace();
             return null;
         }
+    }
 
+    /*
+        the change of password verifies if the old password corresponds with the credentials
+        associated with the given username, to prevent the action taken by an unauthorized user
+     */
+    public void changePassword(ChangePasswordDto changePasswordDto) {
+        User user = userRepository.findByUsername(changePasswordDto.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        UserRepresentation userRepresentation = realmResource.users().search(user.getId().toString()).get(0);
+
+        CredentialRepresentation changedCredential = new CredentialRepresentation();
+        changedCredential.setType(CredentialRepresentation.PASSWORD);
+        changedCredential.setValue(changePasswordDto.getNewPassword());
+        changedCredential.setTemporary(false);
+
+        userRepresentation.setCredentials(Collections.singletonList(changedCredential));
+
+        realmResource.users().get(userRepresentation.getId()).update(userRepresentation);
     }
 
 }

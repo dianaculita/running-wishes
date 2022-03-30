@@ -41,7 +41,7 @@ public class Competition {
     @ManyToMany(mappedBy = "participatesToCompetitions")
     private List<Participant> participants;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
     @JoinColumn(name = "competition_id")
     private List<Donation> donations;
 

@@ -33,8 +33,4 @@ public class AuthenticationClientConfiguration {
         };
     }
 
-//    @Bean
-//    public BasicAuthRequestInterceptor basicAuthRequestInterceptor() {
-//        return new BasicAuthRequestInterceptor(clientId, clientSecret);
-//    }
 }
