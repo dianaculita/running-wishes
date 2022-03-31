@@ -11,5 +11,6 @@ public class SportDto {
 
     private Long sportId;
 
+    @NonNull
     private String name;
 }

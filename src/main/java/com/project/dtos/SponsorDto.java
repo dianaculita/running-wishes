@@ -13,8 +13,10 @@ public class SponsorDto {
 
     private Long sponsorId;
 
+    @NonNull
     private String name;
 
+    @NonNull
     private Double sponsoringFunds;
 
     private List<Long> competitionsIds;

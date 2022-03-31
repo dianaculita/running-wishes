@@ -1,9 +1,6 @@
 package com.project.dtos.auth;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -11,8 +8,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RefreshTokenDto {
 
+    @NonNull
     private String refreshToken;
 
+    @NonNull
     private String grantType;
 
 }

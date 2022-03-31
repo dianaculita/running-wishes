@@ -11,6 +11,7 @@ public class AssociationDto {
 
     private Long associationId;
 
+    @NonNull
     private String name;
 
     private String purpose;

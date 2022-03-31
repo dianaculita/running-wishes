@@ -1,9 +1,6 @@
 package com.project.dtos.auth;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -11,9 +8,12 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LoginDto {
 
+    @NonNull
     private String username;
 
+    @NonNull
     private String password;
 
+    @NonNull
     private String grantType;
 }
