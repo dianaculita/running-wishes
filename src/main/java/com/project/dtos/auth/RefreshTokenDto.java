@@ -1,6 +1,11 @@
 package com.project.dtos.auth;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -8,10 +13,10 @@ import lombok.*;
 @NoArgsConstructor
 public class RefreshTokenDto {
 
-    @NonNull
+    @NotNull
     private String refreshToken;
 
-    @NonNull
+    @NotNull
     private String grantType;
 
 }

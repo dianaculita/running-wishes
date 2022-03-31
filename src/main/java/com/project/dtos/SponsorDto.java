@@ -2,6 +2,7 @@ package com.project.dtos;
 
 import lombok.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @NoArgsConstructor
@@ -13,10 +14,10 @@ public class SponsorDto {
 
     private Long sponsorId;
 
-    @NonNull
+    @NotNull
     private String name;
 
-    @NonNull
+    @NotNull
     private Double sponsoringFunds;
 
     private List<Long> competitionsIds;

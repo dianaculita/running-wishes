@@ -2,6 +2,8 @@ package com.project.dtos;
 
 import lombok.*;
 
+import javax.validation.constraints.NotNull;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -11,6 +13,6 @@ public class SportDto {
 
     private Long sportId;
 
-    @NonNull
+    @NotNull
     private String name;
 }
