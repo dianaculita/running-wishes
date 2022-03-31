@@ -2,6 +2,8 @@ package com.project.dtos;
 
 import lombok.*;
 
+import javax.validation.constraints.NotNull;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -11,7 +13,7 @@ public class AssociationDto {
 
     private Long associationId;
 
-    @NonNull
+    @NotNull
     private String name;
 
     private String purpose;

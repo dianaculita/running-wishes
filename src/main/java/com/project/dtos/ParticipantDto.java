@@ -2,6 +2,7 @@ package com.project.dtos;
 
 import lombok.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @NoArgsConstructor
@@ -13,7 +14,7 @@ public class ParticipantDto {
 
     private String cnp;
 
-    @NonNull
+    @NotNull
     private String name;
 
     private Integer age;
