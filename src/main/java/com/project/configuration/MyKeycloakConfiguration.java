@@ -55,6 +55,8 @@ public class MyKeycloakConfiguration extends KeycloakWebSecurityConfigurerAdapte
         http.cors().and().csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/user/*", "/login", "/refresh").permitAll()
+                .antMatchers("/v3/api-docs/**", "/swagger-ui/**",
+                        "/swagger-ui.html").permitAll()
                 .antMatchers("/participant", "/participant/*").hasRole("USER")
                 .antMatchers("/competition/*", "/sport/*", "/sponsor/*", "/donation/*",
                         "/charity/*", "/association/*").hasRole("ADMIN")
