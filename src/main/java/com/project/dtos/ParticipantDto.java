@@ -13,6 +13,7 @@ public class ParticipantDto {
 
     private String cnp;
 
+    @NonNull
     private String name;
 
     private Integer age;

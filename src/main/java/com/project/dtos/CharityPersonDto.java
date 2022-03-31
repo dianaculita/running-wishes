@@ -11,6 +11,7 @@ public class CharityPersonDto {
 
     private String personCnp;
 
+    @NonNull
     private String name;
 
     private Integer age;
@@ -19,11 +20,15 @@ public class CharityPersonDto {
 
     private String story;
 
+    @NonNull
     private Long iban;
 
+    @NonNull
     private Long associationId;
 
+    @NonNull
     private Double neededFund;
 
+    @NonNull
     private Double raisedFund;
 }
