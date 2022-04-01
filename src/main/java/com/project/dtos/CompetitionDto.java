@@ -2,6 +2,7 @@ package com.project.dtos;
 
 import lombok.*;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -12,14 +13,15 @@ import java.util.List;
 @Builder
 public class CompetitionDto {
 
+    @NotNull
     private Long competitionId;
 
-    @NotNull
+    @NotEmpty
     private String name;
 
     private Integer numberOfDays;
 
-    @NotNull
+    @NotEmpty
     private String location;
 
     @NotNull

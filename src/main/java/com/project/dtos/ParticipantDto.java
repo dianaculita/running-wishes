@@ -2,6 +2,7 @@ package com.project.dtos;
 
 import lombok.*;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -12,14 +13,12 @@ import java.util.List;
 @Builder
 public class ParticipantDto {
 
+    @NotEmpty
     private String cnp;
 
-    @NotNull
+    @NotEmpty
     private String name;
 
-    private Integer age;
-
-    private Character gender;
-
+    @NotNull
     private List<Long> competitionsIds;
 }

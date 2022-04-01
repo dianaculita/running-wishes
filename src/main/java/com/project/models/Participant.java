@@ -21,12 +21,6 @@ public class Participant {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "age")
-    private Integer age;
-
-    @Column(name = "gender")
-    private Character gender;
-
     @ManyToMany
     @JoinTable(
             name = "participates_to",

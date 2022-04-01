@@ -50,8 +50,6 @@ public class ParticipantServiceImpl implements ParticipantService {
         Participant participant = Participant.builder()
                 .cnp(participantDto.getCnp())
                 .name(participantDto.getName())
-                .age(participantDto.getAge())
-                .gender(participantDto.getGender())
                 .participatesToCompetitions(participatesToCompetitions(participantDto.getCompetitionsIds()))
                 .build();
 
@@ -75,17 +73,16 @@ public class ParticipantServiceImpl implements ParticipantService {
         }
     }
 
-    /*
-        the participant can update his participation to competitions only by adding more competitions, meaning
-        that the already bought ticket is non-refundable and the user can not withdraw from a competition
+    /**
+     * The participant can update his participation to competitions only by adding more competitions,
+     * meaning that the already bought ticket is non-refundable and the user can not withdraw
+     * from a competition
      */
     @Override
     public void updateParticipant(ParticipantDto participantDto) {
         Participant participant = getByCnp(participantDto.getCnp());
 
         participant.setName(participantDto.getName());
-        participant.setAge(participantDto.getAge());
-        participant.setGender(participantDto.getGender());
         participant.setParticipatesToCompetitions(participatesToCompetitions(participantDto.getCompetitionsIds()));
 
         participantRepository.save(participant);

@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "CHARITIES", uniqueConstraints = { @UniqueConstraint(columnNames = { "iban" }) })
+@Table(name = "CHARITIES", uniqueConstraints = {@UniqueConstraint(columnNames = {"iban"})})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -20,12 +20,6 @@ public class CharityPerson {
 
     @Column(name = "name")
     private String name;
-
-    @Column(name = "age")
-    private Integer age;
-
-    @Column(name = "gender")
-    private Character gender;
 
     @Column(name = "story")
     private String story;
@@ -43,7 +37,7 @@ public class CharityPerson {
     @JoinColumn(name = "association_id", nullable = false)
     private Association association;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     @JoinColumn(name = "person_cnp")
     private List<Donation> donations;
 

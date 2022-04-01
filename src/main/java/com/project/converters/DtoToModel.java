@@ -15,8 +15,6 @@ public class DtoToModel {
     public static CharityPerson fromCharityPersonDto(CharityPersonDto charityPersonDto) {
         return CharityPerson.builder()
                 .personCnp(charityPersonDto.getPersonCnp())
-                .age(charityPersonDto.getAge())
-                .gender(charityPersonDto.getGender())
                 .iban(charityPersonDto.getIban())
                 .story(charityPersonDto.getStory())
                 .neededFund(charityPersonDto.getNeededFund())
@@ -35,8 +33,6 @@ public class DtoToModel {
         return Participant.builder()
                 .cnp(participantDto.getCnp())
                 .name(participantDto.getName())
-                .age(participantDto.getAge())
-                .gender(participantDto.getGender())
                 .build();
     }
 
@@ -64,7 +60,6 @@ public class DtoToModel {
                 .totalFunds(donationDto.getTotalFunds())
                 .build();
     }
-
 
 
 }

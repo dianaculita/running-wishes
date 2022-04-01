@@ -4,6 +4,7 @@ import com.project.dtos.CharityPersonDto;
 import com.project.services.charity.CharityPersonService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/charity")
+@Tag(name = "Charity Person")
 public class CharityPersonController {
 
     private final CharityPersonService charityPersonService;
@@ -23,7 +25,8 @@ public class CharityPersonController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized Operation"),
+            @ApiResponse(responseCode = "403", description = "Forbidden Operation"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @GetMapping(value = "/{cnp}")
     public CharityPersonDto getCharityPersonByCnp(@PathVariable String cnp) {
@@ -33,7 +36,8 @@ public class CharityPersonController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized Operation"),
+            @ApiResponse(responseCode = "403", description = "Forbidden Operation"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @GetMapping(value = "/getAll")
     public List<CharityPersonDto> getAllCharityPersons() {
@@ -43,7 +47,8 @@ public class CharityPersonController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Created Successfully"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized Operation"),
+            @ApiResponse(responseCode = "403", description = "Forbidden Operation"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @PostMapping
     public String createNewCharityPerson(@RequestBody CharityPersonDto charityPersonDto) {
@@ -53,7 +58,8 @@ public class CharityPersonController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Updated Successfully"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized Operation"),
+            @ApiResponse(responseCode = "403", description = "Forbidden Operation"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @PutMapping
     void updateCharityPerson(@RequestBody CharityPersonDto charityPersonDto) {
@@ -63,7 +69,8 @@ public class CharityPersonController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Deleted Successfully"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized Operation"),
+            @ApiResponse(responseCode = "403", description = "Forbidden Operation"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @DeleteMapping(value = "/{cnp}")
     public void deleteCharityPerson(@PathVariable String cnp) {

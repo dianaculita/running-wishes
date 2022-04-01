@@ -3,8 +3,9 @@ package com.project.controllers.auth;
 import com.project.dtos.auth.LoginDto;
 import com.project.dtos.auth.RefreshTokenDto;
 import com.project.services.auth.AuthenticationService;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Tag(name = "Authentication")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
@@ -22,9 +24,9 @@ public class AuthenticationController {
     }
 
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Login Successful"),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Server Error"),
+            @ApiResponse(responseCode = "200", description = "Login Successful"),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
     @PostMapping("/login")
     public ResponseEntity<?> login(LoginDto loginDto) {
@@ -32,9 +34,9 @@ public class AuthenticationController {
     }
 
     @ApiResponses({
-            @ApiResponse(code = 200, message = "Successful operation"),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Server Error"),
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
     })
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(RefreshTokenDto refreshTokenDto) {

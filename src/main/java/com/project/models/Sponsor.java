@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "SPONSORS", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }) })
+@Table(name = "SPONSORS", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"})})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "ASSOCIATIONS", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }) })
+@Table(name = "ASSOCIATIONS", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"})})
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -25,7 +25,7 @@ public class Association {
     @Column(name = "purpose")
     private String purpose;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     @JoinColumn(name = "association_id")
     private List<CharityPerson> charityPeople;
 
