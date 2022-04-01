@@ -65,7 +65,6 @@ public class CharityPersonServiceTest {
         assertEquals(expectedCharityPerson.getName(), actualCharityPerson.getName());
         assertEquals(expectedCharityPerson.getStory(), actualCharityPerson.getStory());
         assertEquals(expectedCharityPerson.getIban(), actualCharityPerson.getIban());
-        assertEquals(expectedCharityPerson.getAge(), actualCharityPerson.getAge());
         assertEquals(expectedCharityPerson.getNeededFund(), actualCharityPerson.getNeededFund());
         assertEquals(expectedCharityPerson.getRaisedFund(), actualCharityPerson.getRaisedFund());
     }
@@ -76,7 +75,6 @@ public class CharityPersonServiceTest {
                 .name(name)
                 .story("abandoned")
                 .iban(iban)
-                .age(3)
                 .personCnp(cnp)
                 .neededFund(1000.0)
                 .raisedFund(0.0)

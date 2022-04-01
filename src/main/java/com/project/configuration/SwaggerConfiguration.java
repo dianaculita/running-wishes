@@ -5,39 +5,29 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springdoc.core.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
 @OpenAPIDefinition
 public class SwaggerConfiguration {
 
     private static final String SCHEME_NAME = "Bearer Authorization";
-    private static final String SCHEME = "Endpoint access token";
+    private static final String SCHEME = "bearer";
 
     @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.project"))
-                .paths(PathSelectors.any())
+    public GroupedOpenApi api() {
+        return GroupedOpenApi.builder()
+                .group("Running Wishes Charity Platform")
+                .packagesToScan("com.project")
+                .pathsToMatch("/**")
                 .build();
     }
 
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("RUNNING WISHES API")
-                .description("Rest API for Running Wishes Charity Platform")
-                .version("0.0.1")
-                .build();
-    }
-
+    /**
+     * Configuration for bearer authorization scheme
+     */
     @Bean
     public OpenAPI customOpenApi() {
         return new OpenAPI().components(new Components().addSecuritySchemes(SCHEME_NAME, createSecurityScheme()))

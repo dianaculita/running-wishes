@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public TokenDto registerUser(RegisterUserDto registerUserDto) {
-        if(userRepository.existsByUsername(registerUserDto.getUsername())) {
+        if (userRepository.existsByUsername(registerUserDto.getUsername())) {
             throw new UserAlreadyExistsException();
         }
 
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(ChangePasswordDto changePasswordDto) {
-        if(!userRepository.existsByUsername(changePasswordDto.getUsername())) {
+        if (!userRepository.existsByUsername(changePasswordDto.getUsername())) {
             throw new UserNotFoundException();
         }
 

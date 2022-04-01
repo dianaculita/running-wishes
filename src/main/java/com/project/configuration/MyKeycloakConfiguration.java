@@ -14,17 +14,16 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
-/*
-    KeycloakWebSecurityConfigurerAdapter: base class for creating a WebSecurityConfigurer instance
-    provides the security context configuration
-    @KeycloakConfiguration: defines all annotations that are needed to integrate Keycloak in Spring Security
+/**
+ * KeycloakWebSecurityConfigurerAdapter: base class for creating a WebSecurityConfigurer instance
+ * Provides the security context configuration
  */
 @KeycloakConfiguration
 @Import(KeycloakSpringBootConfigResolver.class)
 public class MyKeycloakConfiguration extends KeycloakWebSecurityConfigurerAdapter {
 
-    /*
-        registers the KeycloakAuthenticationProvider with the authentication manager
+    /**
+     * Registers the KeycloakAuthenticationProvider with the authentication manager
      */
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) {
@@ -44,10 +43,10 @@ public class MyKeycloakConfiguration extends KeycloakWebSecurityConfigurerAdapte
     }
 
     /**
-     * defining security constraints
-     * automatically authorizing requests for user registration, login and refresh
-     * user participants will have access only on participant business logic
-     * admin will have access on every other application logic (competitions, donations etc)
+     * Defining security constraints
+     * Automatically authorizing requests for user registration, login and refresh
+     * User participants will have access only on participant creation/update
+     * Admin will have access on every other application logic (competitions, donations etc)
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -57,9 +56,9 @@ public class MyKeycloakConfiguration extends KeycloakWebSecurityConfigurerAdapte
                 .antMatchers("/user/*", "/login", "/refresh").permitAll()
                 .antMatchers("/v3/api-docs/**", "/swagger-ui/**",
                         "/swagger-ui.html").permitAll()
-                .antMatchers("/participant", "/participant/*").hasRole("USER")
+                .antMatchers("/participant").hasRole("USER")
                 .antMatchers("/competition/*", "/sport/*", "/sponsor/*", "/donation/*",
-                        "/charity/*", "/association/*").hasRole("ADMIN")
+                        "/charity/*", "/association/*", "/participant/*").hasRole("ADMIN")
                 .anyRequest().authenticated();
     }
 }

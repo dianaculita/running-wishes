@@ -45,12 +45,12 @@ public class SponsorServiceImpl implements SponsorService {
                 .collect(Collectors.toList());
     }
 
-    /*
-        when the sponsor is created, it will be associated with a competition, meaning that it will
-        sponsor that competition (or each competition if more) with a fixed amount of money - sponsoringFunds
-        as soon as the collaboration between a sponsor and a competition is established, the competition
-        will benefit of the sponsoring funds and will save them for further donations, meaning that
-        the competition fundraising budget will be updated
+    /**
+     * When the sponsor is created, it will be associated with a competition, meaning that it will
+     * sponsor that competition (or each competition if more) with a fixed amount of money - sponsoringFunds
+     * As soon as the collaboration between a sponsor and a competition is established, the competition
+     * will benefit of the sponsoring funds and will save them for further donations, meaning that
+     * the competition fundraising budget will be updated
      */
     @Override
     public Long createNewSponsor(SponsorDto sponsorDto) {
@@ -82,10 +82,10 @@ public class SponsorServiceImpl implements SponsorService {
         }
     }
 
-    /*
-        if updating a sponsor means changing its fundraising budget, then all the associated competitions
-        need to update their existing funds -> the old sponsor fundraising budget will be extracted
-        from the existing funds and the new budget will be added
+    /**
+     * If updating a sponsor means changing its fundraising budget, then all the associated competitions
+     * need to update their existing funds -> the old sponsor fundraising budget will be extracted
+     * from the existing funds and the new budget will be added
      */
     @Override
     public void updateSponsor(SponsorDto sponsorDto) {

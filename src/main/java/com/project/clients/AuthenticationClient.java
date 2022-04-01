@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.Map;
 
 @FeignClient(value = "auth", configuration = AuthenticationClientConfiguration.class,
-                url = "${my.keycloak.url}")
+        url = "${my.keycloak.url}")
 public interface AuthenticationClient {
 
     @PostMapping(value = "${my.keycloak.auth.endpoint}")

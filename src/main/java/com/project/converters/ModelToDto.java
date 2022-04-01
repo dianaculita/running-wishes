@@ -6,6 +6,9 @@ import com.project.models.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Util class for converting an entity model object to a dto object
+ */
 public class ModelToDto {
 
     public static AssociationDto associationToDto(Association association) {
@@ -20,8 +23,6 @@ public class ModelToDto {
         return CharityPersonDto.builder()
                 .personCnp(charityPerson.getPersonCnp())
                 .name(charityPerson.getName())
-                .age(charityPerson.getAge())
-                .gender(charityPerson.getGender())
                 .iban(charityPerson.getIban())
                 .story(charityPerson.getStory())
                 .neededFund(charityPerson.getNeededFund())
@@ -62,8 +63,6 @@ public class ModelToDto {
         return ParticipantDto.builder()
                 .cnp(participant.getCnp())
                 .name(participant.getName())
-                .age(participant.getAge())
-                .gender(participant.getGender())
                 .competitionsIds(competitionsIds)
                 .build();
     }

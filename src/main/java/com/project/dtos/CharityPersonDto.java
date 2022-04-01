@@ -2,6 +2,7 @@ package com.project.dtos;
 
 import lombok.*;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @NoArgsConstructor
@@ -11,18 +12,15 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class CharityPersonDto {
 
+    @NotEmpty
     private String personCnp;
 
-    @NotNull
+    @NotEmpty
     private String name;
-
-    private Integer age;
-
-    private Character gender;
 
     private String story;
 
-    @NotNull
+    @NotEmpty
     private Long iban;
 
     @NotNull

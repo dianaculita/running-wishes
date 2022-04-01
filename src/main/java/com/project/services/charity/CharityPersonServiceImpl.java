@@ -51,8 +51,6 @@ public class CharityPersonServiceImpl implements CharityPersonService {
         CharityPerson charityPerson = CharityPerson.builder()
                 .personCnp(charityPersonDto.getPersonCnp())
                 .name(charityPersonDto.getName())
-                .age(charityPersonDto.getAge())
-                .gender(charityPersonDto.getGender())
                 .story(charityPersonDto.getStory())
                 .iban(charityPersonDto.getIban())
                 .neededFund(charityPersonDto.getNeededFund())
@@ -71,9 +69,7 @@ public class CharityPersonServiceImpl implements CharityPersonService {
     public void updateCharityPerson(CharityPersonDto charityPersonDto) {
         CharityPerson charityPerson = getByCnp(charityPersonDto.getPersonCnp());
 
-        charityPerson.setAge(charityPersonDto.getAge());
         charityPerson.setName(charityPersonDto.getName());
-        charityPerson.setGender(charityPersonDto.getGender());
         charityPerson.setIban(charityPersonDto.getIban());
         charityPerson.setStory(charityPersonDto.getStory());
         charityPerson.setRaisedFund(charityPersonDto.getRaisedFund());

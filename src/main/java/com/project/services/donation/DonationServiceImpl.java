@@ -52,12 +52,12 @@ public class DonationServiceImpl implements DonationService {
                 .collect(Collectors.toList());
     }
 
-    /*
-        the donation creation establishes a connection to a certain sponsor;
-        it will be established to whom the donation is redirected and how much money the person receives,
-        based on the amount of money they have already received compared to how much money they need in total
-        an update of the raisedFund for the requested person is also needed
-    */
+    /**
+     * The donation creation establishes a connection to a certain sponsor
+     * It will be established to whom the donation is redirected and how much money the person receives,
+     * based on the amount of money they have already received compared to how much money they need in total
+     * An update of the raisedFund for the requested person is also needed
+     */
     @Override
     public Long createNewDonation(DonationDto donationDto) {
         CharityPerson needingPerson = getTheMostNeedingPerson();
@@ -79,20 +79,20 @@ public class DonationServiceImpl implements DonationService {
         return competitionRepository.getById(donationDto.getCompetitionId());
     }
 
-    /*
-        searches for the most needing charity case, based on the amount of money they have raised compared
-        to the amount of money they need
-    */
+    /**
+     * Searches for the most needing charity case, based on the amount of money they have raised compared
+     * to the amount of money they need
+     */
     private CharityPerson getTheMostNeedingPerson() {
         return charityPersonRepository.findAll().stream()
                 .max(Comparator.comparingDouble(pers -> pers.getNeededFund() - pers.getRaisedFund()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    /*
-        calculates the amount of money that will be donated, based on the actual raised amount of money,
-        that was already updated with the paid tickets and sponsoring budget
-        the donation will be extracted from the actual competition donation funds
+    /**
+     * Calculates the amount of money that will be donated, based on the actual raised amount of money,
+     * that was already updated with the paid tickets and sponsoring budget
+     * The donation will be extracted from the actual competition donation funds
      */
     private Double calculateTotalFunds(Competition competition) {
         Double donationAmount = 0.02 * competition.getRaisedMoney();
@@ -127,14 +127,6 @@ public class DonationServiceImpl implements DonationService {
 
         charityPersonRepository.save(charityPerson);
     }
-
-    /*
-        the update is no longer needed, because when a donation is created, the funds are redirected
-        to the person in need
-        an update is not justified. to send money to the same person, another donation will be necessary
-     */
-    @Override
-    public void updateDonation(DonationDto donationDto) {}
 
     @Override
     public void deleteDonation(Long id) {

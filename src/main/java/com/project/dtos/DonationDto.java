@@ -2,6 +2,7 @@ package com.project.dtos;
 
 import lombok.*;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @NoArgsConstructor
@@ -11,9 +12,10 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class DonationDto {
 
+    @NotNull
     private Long donationId;
 
-    @NotNull
+    @NotEmpty
     private String charityPersonCnp;
 
     @NotNull
