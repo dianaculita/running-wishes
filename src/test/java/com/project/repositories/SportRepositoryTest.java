@@ -26,13 +26,13 @@ public class SportRepositoryTest {
 
     @Test
     public void testFindById() {
-        Sport sport = getSportMock("running");
-        Long sportId = sportRepository.save(sport).getSportId();
+        Sport expectedSport = getSportMock("sport");
+        Long sportId = sportRepository.save(expectedSport).getSportId();
 
         Optional<Sport> actualSport = sportRepository.findById(sportId);
 
         assertTrue(actualSport.isPresent());
-        assertEquals(sport, actualSport.get());
+        assertEquals(expectedSport, actualSport.get());
     }
 
     private Sport getSportMock(String name) {
@@ -43,8 +43,8 @@ public class SportRepositoryTest {
 
     @Test
     public void testGetAll() {
-        Sport sport = getSportMock("running");
-        Sport sport2 = getSportMock("swimming");
+        Sport sport = getSportMock("sport1");
+        Sport sport2 = getSportMock("sport2");
         List<Sport> expectedSports = Arrays.asList(sport, sport2);
 
         sportRepository.saveAll(expectedSports);
@@ -56,7 +56,7 @@ public class SportRepositoryTest {
 
     @Test
     public void testDelete() {
-        Sport sport = getSportMock("running");
+        Sport sport = getSportMock("sport");
         Long sportId = sportRepository.save(sport).getSportId();
 
         sportRepository.delete(sport);

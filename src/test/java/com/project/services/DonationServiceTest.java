@@ -27,8 +27,9 @@ import static org.mockito.Mockito.*;
 @DataJpaTest
 public class DonationServiceTest {
 
-    public static final long DONATION_ID = 100L;
-    public static final long COMPETITION_ID = 300L;
+    private static final long DONATION_ID = 100L;
+    private static final long COMPETITION_ID = 300L;
+
     @Mock
     private DonationRepository donationRepository;
 
@@ -116,18 +117,18 @@ public class DonationServiceTest {
 
         when(charityPersonRepository.findAll()).thenReturn(charityPersons);
         when(competitionRepository.getById(COMPETITION_ID)).thenReturn(competition);
-        when(competitionRepository.save(any())).thenReturn(competition);
+        when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
         when(charityPersonRepository.findByPersonCnp("5180101253377")).thenReturn(Optional.ofNullable(charityPerson));
-        when(charityPersonRepository.save(any())).thenReturn(charityPerson);
-        when(donationRepository.save(any())).thenReturn(donation);
+        when(charityPersonRepository.save(any(CharityPerson.class))).thenReturn(charityPerson);
+        when(donationRepository.save(any(Donation.class))).thenReturn(donation);
 
         donationService.createNewDonation(donationDto);
 
         verify(charityPersonRepository).findAll();
         verify(charityPersonRepository).findByPersonCnp(anyString());
-        verify(charityPersonRepository).save(any());
+        verify(charityPersonRepository).save(any(CharityPerson.class));
         verify(competitionRepository, times(2)).getById(anyLong());
-        verify(competitionRepository).save(any());
+        verify(competitionRepository).save(any(Competition.class));
     }
 
     @Test
@@ -162,7 +163,7 @@ public class DonationServiceTest {
         donationService.deleteDonation(DONATION_ID);
 
         verify(donationRepository).findById(anyLong());
-        verify(donationRepository).delete(any());
+        verify(donationRepository).delete(any(Donation.class));
     }
 
 

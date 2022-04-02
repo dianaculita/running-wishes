@@ -33,7 +33,8 @@ public class SportControllerTest {
 
     @Test
     public void testGetSportById() {
-        SportDto expectedSport = getSportDtoMock(SPORT_ID, "running");
+        SportDto expectedSport = new SportDto();
+        expectedSport.setSportId(SPORT_ID);
 
         when(sportService.getSportById(SPORT_ID)).thenReturn(expectedSport);
 
@@ -44,19 +45,12 @@ public class SportControllerTest {
         verify(sportService).getSportById(anyLong());
     }
 
-    private SportDto getSportDtoMock(Long sportId, String name) {
-        SportDto expectedSport = SportDto.builder()
-                .sportId(sportId)
-                .name(name)
-                .build();
-        return expectedSport;
-    }
-
     @Test
     public void testGetAllSports() {
-        SportDto sportDto = getSportDtoMock(SPORT_ID, "running");
-        SportDto sportDto2 = getSportDtoMock(SPORT_ID + 1L, "swimming");
-
+        SportDto sportDto = new SportDto();
+        sportDto.setSportId(SPORT_ID);
+        SportDto sportDto2 = new SportDto();
+        sportDto.setSportId(SPORT_ID);
         List<SportDto> expectedSports = Arrays.asList(sportDto, sportDto2);
 
         when(sportService.getAllSports()).thenReturn(expectedSports);
@@ -70,7 +64,8 @@ public class SportControllerTest {
 
     @Test
     public void testCreateNewSport() {
-        SportDto sportDto = getSportDtoMock(SPORT_ID, "running");
+        SportDto sportDto = new SportDto();
+        sportDto.setSportId(SPORT_ID);
 
         when(sportService.createNewSport(sportDto)).thenReturn(SPORT_ID);
 
@@ -83,7 +78,8 @@ public class SportControllerTest {
 
     @Test
     public void testUpdateSport() {
-        SportDto sportDto = getSportDtoMock(SPORT_ID, "running");
+        SportDto sportDto = new SportDto();
+        sportDto.setSportId(SPORT_ID);
 
         doNothing().when(sportService).updateSport(sportDto);
 
@@ -94,8 +90,6 @@ public class SportControllerTest {
 
     @Test
     public void testDeleteSport() {
-        SportDto sportDto = getSportDtoMock(SPORT_ID, "running");
-
         doNothing().when(sportService).deleteSport(SPORT_ID);
 
         sportController.deleteSport(SPORT_ID);

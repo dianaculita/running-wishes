@@ -23,9 +23,10 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @DataJpaTest
-public class SportServicesTest {
+public class SportServiceTest {
 
-    public static final long SPORT_ID = 100L;
+    private static final long SPORT_ID = 100L;
+
     @Mock
     private SportRepository sportRepository;
 
@@ -39,10 +40,7 @@ public class SportServicesTest {
 
     @Test
     public void testGetSportById() {
-        Sport sport = Sport.builder()
-                .sportId(SPORT_ID)
-                .name("running")
-                .build();
+        Sport sport = getSportMock(SPORT_ID, "running");
 
         SportDto expectedSport = ModelToDto.sportToDto(sport);
 
@@ -53,6 +51,13 @@ public class SportServicesTest {
         assertEquals(expectedSport.getName(), actualSport.getName());
 
         verify(sportRepository).findById(anyLong());
+    }
+
+    private Sport getSportMock(Long id, String name) {
+        return Sport.builder()
+                .sportId(id)
+                .name(name)
+                .build();
     }
 
     @Test
@@ -66,21 +71,12 @@ public class SportServicesTest {
 
     @Test
     public void testGetAllSports() {
-        Sport sport = Sport.builder()
-                .sportId(SPORT_ID)
-                .name("running")
-                .build();
-
-        Sport sport2 = Sport.builder()
-                .sportId(SPORT_ID + 1L)
-                .name("jogging")
-                .build();
-
+        Sport sport = getSportMock(SPORT_ID, "running");
+        Sport sport2 = getSportMock(SPORT_ID + 1L, "swimming");
         List<Sport> sports = Arrays.asList(sport, sport2);
 
         SportDto sportDto = ModelToDto.sportToDto(sport);
         SportDto sportDto2 = ModelToDto.sportToDto(sport2);
-
         List<SportDto> expectedSports = Arrays.asList(sportDto, sportDto2);
 
         when(sportRepository.findAll()).thenReturn(sports);
@@ -92,5 +88,66 @@ public class SportServicesTest {
         assertEquals(expectedSports.get(1).getName(), actualSports.get(1).getName());
 
         verify(sportRepository).findAll();
+    }
+
+    @Test
+    public void testCreateNewSport() {
+        Sport sport = getSportMock(SPORT_ID, "running");
+        SportDto sportDto = ModelToDto.sportToDto(sport);
+
+        when(sportRepository.save(any(Sport.class))).thenReturn(sport);
+
+        sportService.createNewSport(sportDto);
+
+        verify(sportRepository).save(any(Sport.class));
+    }
+
+    @Test
+    public void testUpdateSport() {
+        Sport sport = getSportMock(SPORT_ID, "running");
+        SportDto sportDto = ModelToDto.sportToDto(sport);
+
+        when(sportRepository.findById(SPORT_ID)).thenReturn(Optional.of(sport));
+        when(sportRepository.save(any(Sport.class))).thenReturn(sport);
+
+        sportService.updateSport(sportDto);
+
+        verify(sportRepository).findById(anyLong());
+        verify(sportRepository).save(any(Sport.class));
+    }
+
+    @Test
+    public void testUpdateSport_shouldThrowNotFoundException() {
+        SportDto sportDto = new SportDto();
+        sportDto.setSportId(SPORT_ID);
+
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(sportRepository).findById(SPORT_ID);
+
+        assertThrows(ResponseStatusException.class, () -> sportService.updateSport(sportDto));
+
+        verify(sportRepository).findById(anyLong());
+    }
+
+    @Test
+    public void testDeleteSport() {
+        Sport sport = new Sport();
+        sport.setSportId(SPORT_ID);
+
+        when(sportRepository.findById(SPORT_ID)).thenReturn(Optional.of(sport));
+        doNothing().when(sportRepository).delete(sport);
+
+        sportService.deleteSport(SPORT_ID);
+
+        verify(sportRepository).findById(anyLong());
+        verify(sportRepository).delete(any(Sport.class));
+    }
+
+    @Test
+    public void testDeleteSport_shouldThrowNotFoundException() {
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(sportRepository).findById(SPORT_ID);
+
+        assertThrows(ResponseStatusException.class, () -> sportService.deleteSport(SPORT_ID));
+
+        verify(sportRepository).findById(anyLong());
     }
 }

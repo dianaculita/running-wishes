@@ -77,13 +77,24 @@ public class ParticipantServiceImpl implements ParticipantService {
      * The participant can update his participation to competitions only by adding more competitions,
      * meaning that the already bought ticket is non-refundable and the user can not withdraw
      * from a competition
+     * The new added competitions will have their fundraising budget updated
      */
     @Override
     public void updateParticipant(ParticipantDto participantDto) {
         Participant participant = getByCnp(participantDto.getCnp());
+        List<Long> oldCompetitions = participant.getParticipatesToCompetitions().stream()
+                        .map(Competition::getCompetitionId)
+                        .collect(Collectors.toList());
 
+        List<Long> updatedCompetitions = participantDto.getCompetitionsIds();
+
+        updatedCompetitions.removeAll(oldCompetitions); // finds only the newly added competitions in order to update
+                                                        // their fundraising budget with the ticket price
+        updateCompetitionsFundraisingBudget(updatedCompetitions);
+
+        oldCompetitions.addAll(updatedCompetitions); // updates the list of competitions on top of the already existing ones
         participant.setName(participantDto.getName());
-        participant.setParticipatesToCompetitions(participatesToCompetitions(participantDto.getCompetitionsIds()));
+        participant.setParticipatesToCompetitions(participatesToCompetitions(oldCompetitions));
 
         participantRepository.save(participant);
     }

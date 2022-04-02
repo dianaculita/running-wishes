@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 @DataJpaTest
 public class AssociationServiceTest {
 
-    public static final long ASSOCIATION_ID = 100L;
+    private static final long ASSOCIATION_ID = 100L;
 
     @Mock
     private AssociationRepository associationRepository;
@@ -111,11 +111,11 @@ public class AssociationServiceTest {
         Association association = new Association();
         AssociationDto associationDto = new AssociationDto();
 
-        when(associationRepository.save(any())).thenReturn(association);
+        when(associationRepository.save(any(Association.class))).thenReturn(association);
 
         associationService.createNewAssociation(associationDto);
 
-        verify(associationRepository).save(any());
+        verify(associationRepository).save(any(Association.class));
     }
 
     @Test
@@ -124,12 +124,12 @@ public class AssociationServiceTest {
         AssociationDto associationDto = ModelToDto.associationToDto(association);
 
         when(associationRepository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(association));
-        when(associationRepository.save(any())).thenReturn(association);
+        when(associationRepository.save(any(Association.class))).thenReturn(association);
 
         associationService.updateAssociation(associationDto);
 
         verify(associationRepository).findById(anyLong());
-        verify(associationRepository).save(any());
+        verify(associationRepository).save(any(Association.class));
     }
 
     @Test
@@ -153,7 +153,7 @@ public class AssociationServiceTest {
         associationService.deleteAssociation(ASSOCIATION_ID);
 
         verify(associationRepository).findById(anyLong());
-        verify(associationRepository).delete(any());
+        verify(associationRepository).delete(any(Association.class));
     }
 
     @Test

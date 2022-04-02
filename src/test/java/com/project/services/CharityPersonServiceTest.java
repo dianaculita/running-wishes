@@ -26,9 +26,9 @@ import static org.mockito.Mockito.*;
 @DataJpaTest
 public class CharityPersonServiceTest {
 
-    public static final String PERSON_CNP = "5180101253377";
-    public static final String PERSON2_CNP = "6180101253277";
-    public static final long ASSOCIATION_ID = 100L;
+    private static final String PERSON_CNP = "5180101253377";
+    private static final String PERSON2_CNP = "6180101253277";
+    private static final long ASSOCIATION_ID = 100L;
 
     @Mock
     private CharityPersonRepository charityPersonRepository;
@@ -70,7 +70,7 @@ public class CharityPersonServiceTest {
     }
 
     private CharityPerson getCharityPersonMock(String name, Long iban, Association association, String cnp) {
-        CharityPerson charityPerson = CharityPerson.builder()
+        return CharityPerson.builder()
                 .association(association)
                 .name(name)
                 .story("abandoned")
@@ -79,7 +79,6 @@ public class CharityPersonServiceTest {
                 .neededFund(1000.0)
                 .raisedFund(0.0)
                 .build();
-        return charityPerson;
     }
 
     @Test
@@ -122,11 +121,11 @@ public class CharityPersonServiceTest {
         CharityPersonDto charityPersonDto = ModelToDto.charityPersonToDto(charityPerson);
 
         when(associationService.getAssociationById(ASSOCIATION_ID)).thenReturn(ModelToDto.associationToDto(association));
-        when(charityPersonRepository.save(any())).thenReturn(charityPerson);
+        when(charityPersonRepository.save(any(CharityPerson.class))).thenReturn(charityPerson);
 
         charityPersonService.createNewCharityPerson(charityPersonDto);
 
-        verify(charityPersonRepository).save(any());
+        verify(charityPersonRepository).save(any(CharityPerson.class));
     }
 
     @Test
@@ -137,12 +136,12 @@ public class CharityPersonServiceTest {
 
         when(associationService.getAssociationById(ASSOCIATION_ID)).thenReturn(ModelToDto.associationToDto(association));
         when(charityPersonRepository.findByPersonCnp(PERSON_CNP)).thenReturn(Optional.of(charityPerson));
-        when(charityPersonRepository.save(any())).thenReturn(charityPerson);
+        when(charityPersonRepository.save(any(CharityPerson.class))).thenReturn(charityPerson);
 
         charityPersonService.updateCharityPerson(charityPersonDto);
 
         verify(charityPersonRepository).findByPersonCnp(anyString());
-        verify(charityPersonRepository).save(any());
+        verify(charityPersonRepository).save(any(CharityPerson.class));
     }
 
     @Test
@@ -169,7 +168,7 @@ public class CharityPersonServiceTest {
         charityPersonService.deleteCharityPerson(PERSON_CNP);
 
         verify(charityPersonRepository).findByPersonCnp(anyString());
-        verify(charityPersonRepository).delete(any());
+        verify(charityPersonRepository).delete(any(CharityPerson.class));
     }
 
     @Test

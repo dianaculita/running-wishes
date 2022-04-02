@@ -86,6 +86,7 @@ public class SponsorServiceImpl implements SponsorService {
      * If updating a sponsor means changing its fundraising budget, then all the associated competitions
      * need to update their existing funds -> the old sponsor fundraising budget will be extracted
      * from the existing funds and the new budget will be added
+     * The sponsor can not withdraw from a collaboration with a competition
      */
     @Override
     public void updateSponsor(SponsorDto sponsorDto) {
