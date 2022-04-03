@@ -2,13 +2,13 @@ package com.project.services;
 
 import com.project.converters.ModelToDto;
 import com.project.dtos.ParticipantDto;
+import com.project.exceptions.ParticipantAlreadyEnrolledException;
 import com.project.models.Competition;
 import com.project.models.Participant;
 import com.project.repositories.CompetitionRepository;
 import com.project.repositories.ParticipantRepository;
 import com.project.services.participant.ParticipantServiceImpl;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,6 +16,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.ws.rs.BadRequestException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -69,7 +71,7 @@ public class ParticipantServiceTest {
         return Participant.builder()
                 .cnp(cnp)
                 .name(name)
-                .participatesToCompetitions(Arrays.asList(competition))
+                .competitions(Arrays.asList(competition))
                 .build();
     }
 
@@ -79,6 +81,7 @@ public class ParticipantServiceTest {
                 .name(name)
                 .ticketFee(30.0)
                 .raisedMoney(30.0)
+                .participants(new ArrayList<>())
                 .build();
     }
 
@@ -117,22 +120,19 @@ public class ParticipantServiceTest {
         Participant participant = getParticipantMock(CNP, "Ioana");
         ParticipantDto participantDto = ModelToDto.participantToDto(participant);
 
-        Competition competition = participant.getParticipatesToCompetitions().get(0);
+        Competition competition = participant.getCompetitions().get(0);
 
-        when(competitionRepository.findByCompetitionIdIn(participantDto.getCompetitionsIds())).thenReturn(Arrays.asList(competition));
-        when(competitionRepository.getById(COMPETITION_ID)).thenReturn(competition);
-        when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
         when(participantRepository.save(any(Participant.class))).thenReturn(participant);
+        when(competitionRepository.findById(COMPETITION_ID)).thenReturn(Optional.ofNullable(competition));
+        when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
 
         participantService.createNewParticipant(participantDto);
 
-        verify(competitionRepository).findByCompetitionIdIn(anyList());
-        verify(competitionRepository).getById(anyLong());
-        verify(competitionRepository).save(any(Competition.class));
         verify(participantRepository).save(any(Participant.class));
+        verify(competitionRepository).findById(anyLong());
+        verify(competitionRepository).save(any(Competition.class));
     }
 
-    @Disabled
     @Test
     public void testUpdateParticipant() {
         Participant participant = getParticipantMock(CNP, "Ioana");
@@ -144,21 +144,18 @@ public class ParticipantServiceTest {
 
         Competition competition = getCompetitionMock(COMPETITION_ID, "Color Run");
         Competition competition2 = getCompetitionMock(COMPETITION_ID + 1L, "Run");
-        List<Competition> competitions = Arrays.asList(competition, competition2);
 
         when(participantRepository.findByCnp(CNP)).thenReturn(Optional.of(participant));
-        when(competitionRepository.findByCompetitionIdIn(updatedParticipant.getCompetitionsIds())).thenReturn(competitions);
-        when(competitionRepository.getById(COMPETITION_ID)).thenReturn(competition);
+        when(competitionRepository.findById(COMPETITION_ID)).thenReturn(Optional.ofNullable(competition));
         when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
-        when(competitionRepository.getById(COMPETITION_ID + 1L)).thenReturn(competition2);
+        when(competitionRepository.findById(COMPETITION_ID + 1L)).thenReturn(Optional.ofNullable(competition2));
         when(competitionRepository.save(any(Competition.class))).thenReturn(competition2);
         when(participantRepository.save(any(Participant.class))).thenReturn(participant);
 
         participantService.updateParticipant(updatedParticipant);
 
         verify(participantRepository).findByCnp(anyString());
-        verify(competitionRepository).findByCompetitionIdIn(anyList());
-        verify(competitionRepository, times(2)).getById(anyLong());
+        verify(competitionRepository, times(2)).findById(anyLong());
         verify(competitionRepository, times(2)).save(any(Competition.class));
         verify(participantRepository).save(any(Participant.class));
     }
@@ -176,8 +173,25 @@ public class ParticipantServiceTest {
     }
 
     @Test
+    public void testUpdateParticipant_shouldThrowParticipantAlreadyEnrolledException() {
+        Participant participant = getParticipantMock(CNP, "Ioana");
+        ParticipantDto updatedParticipant = ParticipantDto.builder()
+                .cnp(CNP)
+                .name("Ioana")
+                .competitionsIds(Arrays.asList(COMPETITION_ID))
+                .build();
+
+        when(participantRepository.findByCnp(CNP)).thenReturn(Optional.ofNullable(participant));
+
+        assertThrows(ParticipantAlreadyEnrolledException.class, () -> participantService.updateParticipant(updatedParticipant));
+
+        verify(participantRepository).findByCnp(anyString());
+    }
+
+    @Test
     public void testDeleteParticipant() {
         Participant participant = getParticipantMock(CNP, "Ioana");
+        participant.setCompetitions(new ArrayList<>());
 
         when(participantRepository.findByCnp(CNP)).thenReturn(Optional.ofNullable(participant));
         doNothing().when(participantRepository).delete(participant);
@@ -193,6 +207,16 @@ public class ParticipantServiceTest {
         doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(participantRepository).findByCnp(CNP);
 
         assertThrows(ResponseStatusException.class, () -> participantService.deleteParticipant(CNP));
+
+        verify(participantRepository).findByCnp(anyString());
+    }
+
+    @Test
+    public void testDeleteParticipant_shouldThrowBadRequestException() {
+        Participant participant = getParticipantMock(CNP, "Jane");
+        when(participantRepository.findByCnp(CNP)).thenReturn(Optional.ofNullable(participant));
+
+        assertThrows(BadRequestException.class, () -> participantService.deleteParticipant(CNP));
 
         verify(participantRepository).findByCnp(anyString());
     }

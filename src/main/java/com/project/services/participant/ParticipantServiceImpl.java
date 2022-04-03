@@ -2,6 +2,7 @@ package com.project.services.participant;
 
 import com.project.converters.ModelToDto;
 import com.project.dtos.ParticipantDto;
+import com.project.exceptions.ParticipantAlreadyEnrolledException;
 import com.project.models.Competition;
 import com.project.models.Participant;
 import com.project.repositories.CompetitionRepository;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.ws.rs.BadRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,27 +52,26 @@ public class ParticipantServiceImpl implements ParticipantService {
         Participant participant = Participant.builder()
                 .cnp(participantDto.getCnp())
                 .name(participantDto.getName())
-                .participatesToCompetitions(participatesToCompetitions(participantDto.getCompetitionsIds()))
                 .build();
 
-        updateCompetitionsFundraisingBudget(participantDto.getCompetitionsIds());
+        participant = participantRepository.save(participant);
+        updateCompetitionWithParticipant(participant, participantDto);
 
-        return participantRepository.save(participant).getCnp();
+        return participant.getCnp();
     }
 
-    private List<Competition> participatesToCompetitions(List<Long> ids) {
-        return competitionRepository.findByCompetitionIdIn(ids);
-    }
+    private void updateCompetitionWithParticipant(Participant participant, ParticipantDto participantDto) {
+        final Participant participantFinal = participant;
 
-    private void updateCompetitionsFundraisingBudget(List<Long> competitions) {
-        for (Long competitionId : competitions) {
-            Competition competition = competitionRepository.getById(competitionId);
-
-            Double existingFunds = competition.getRaisedMoney();
-            competition.setRaisedMoney(existingFunds + competition.getTicketFee());
-
-            competitionRepository.save(competition);
-        }
+        participantDto.getCompetitionsIds().forEach(competitionId -> {
+            Competition competition = competitionRepository.findById(competitionId)
+                          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            if (!competition.getParticipants().contains(participant)) {
+                competition.getParticipants().add(participantFinal);
+                competition.setRaisedMoney(competition.getRaisedMoney() + competition.getTicketFee());
+                competitionRepository.save(competition);
+            }
+        });
     }
 
     /**
@@ -82,26 +83,33 @@ public class ParticipantServiceImpl implements ParticipantService {
     @Override
     public void updateParticipant(ParticipantDto participantDto) {
         Participant participant = getByCnp(participantDto.getCnp());
-        List<Long> oldCompetitions = participant.getParticipatesToCompetitions().stream()
-                        .map(Competition::getCompetitionId)
-                        .collect(Collectors.toList());
-
-        List<Long> updatedCompetitions = participantDto.getCompetitionsIds();
-
-        updatedCompetitions.removeAll(oldCompetitions); // finds only the newly added competitions in order to update
-                                                        // their fundraising budget with the ticket price
-        updateCompetitionsFundraisingBudget(updatedCompetitions);
-
-        oldCompetitions.addAll(updatedCompetitions); // updates the list of competitions on top of the already existing ones
         participant.setName(participantDto.getName());
-        participant.setParticipatesToCompetitions(participatesToCompetitions(oldCompetitions));
 
+        List<Long> competitionsIds = participant.getCompetitions().stream()
+                .map(Competition::getCompetitionId)
+                .collect(Collectors.toList());
+
+        if (competitionsIds.containsAll(participantDto.getCompetitionsIds())) {
+            throw new ParticipantAlreadyEnrolledException();
+        }
+
+        updateCompetitionWithParticipant(participant, participantDto);
         participantRepository.save(participant);
     }
 
+    /**
+     * If the participant to be deleted participates in any competition, then a Bad Request exception
+     * is thrown as the withdrawal is not permitted
+     * The deletion of the participant is only possible if the competition list if empty
+     */
     @Override
     public void deleteParticipant(String cnp) {
-        participantRepository.delete(getByCnp(cnp));
+        Participant participant = getByCnp(cnp);
+        if (participant.getCompetitions().size() > 0) {
+            throw new BadRequestException("The participant can not withdraw from a competition!");
+        } else {
+            participantRepository.delete(participant);
+        }
     }
 
 }
