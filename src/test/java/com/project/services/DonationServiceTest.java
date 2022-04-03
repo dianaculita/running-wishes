@@ -153,18 +153,4 @@ public class DonationServiceTest {
         verify(charityPersonRepository).findAll();
     }
 
-    @Test
-    public void testDeleteDonation() {
-        Donation donation = Donation.builder().donationId(DONATION_ID).build();
-
-        when(donationRepository.findById(DONATION_ID)).thenReturn(Optional.ofNullable(donation));
-        doNothing().when(donationRepository).delete(donation);
-
-        donationService.deleteDonation(DONATION_ID);
-
-        verify(donationRepository).findById(anyLong());
-        verify(donationRepository).delete(any(Donation.class));
-    }
-
-
 }
