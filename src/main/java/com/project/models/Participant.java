@@ -21,12 +21,7 @@ public class Participant {
     @Column(name = "name")
     private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "participates_to",
-            joinColumns = @JoinColumn(name = "participant_cnp"),
-            inverseJoinColumns = @JoinColumn(name = "competition_id")
-    )
-    private List<Competition> participatesToCompetitions;
+    @ManyToMany(mappedBy = "participants")
+    private List<Competition> competitions;
 
 }

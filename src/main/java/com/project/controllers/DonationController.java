@@ -55,14 +55,4 @@ public class DonationController {
         return donationService.createNewDonation(donationDto);
     }
 
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Deleted Successfully"),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "403", description = "Forbidden Operation"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-    })
-    @DeleteMapping(value = "/{id}")
-    public void deleteDonation(@PathVariable Long id) {
-        donationService.deleteDonation(id);
-    }
 }

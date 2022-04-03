@@ -128,9 +128,4 @@ public class DonationServiceImpl implements DonationService {
         charityPersonRepository.save(charityPerson);
     }
 
-    @Override
-    public void deleteDonation(Long id) {
-        donationRepository.delete(getById(id));
-    }
-
 }

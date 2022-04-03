@@ -50,7 +50,7 @@ public class SportServiceImpl implements SportService {
 
     @Override
     public void updateSport(SportDto sportDto) {
-        Sport sport = sportRepository.getById(sportDto.getSportId());
+        Sport sport = getById(sportDto.getSportId());
 
         sport.setName(sportDto.getName());
 

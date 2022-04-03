@@ -3,7 +3,9 @@ package com.project.services;
 import com.project.converters.ModelToDto;
 import com.project.dtos.AssociationDto;
 import com.project.models.Association;
+import com.project.models.CharityPerson;
 import com.project.repositories.AssociationRepository;
+import com.project.repositories.CharityPersonRepository;
 import com.project.services.association.AssociationServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -24,10 +27,13 @@ import static org.mockito.Mockito.*;
 @DataJpaTest
 public class AssociationServiceTest {
 
-    public static final long ASSOCIATION_ID = 100L;
+    private static final long ASSOCIATION_ID = 100L;
 
     @Mock
     private AssociationRepository associationRepository;
+
+    @Mock
+    private CharityPersonRepository charityPersonRepository;
 
     @InjectMocks
     private AssociationServiceImpl associationService;
@@ -39,7 +45,7 @@ public class AssociationServiceTest {
 
     @Test
     public void testGetAssociationById() {
-        Association association = getAssociationMock();
+        Association association = getAssociationMock(ASSOCIATION_ID, "People together");
         AssociationDto expectedAssociation = ModelToDto.associationToDto(association);
 
         when(associationRepository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(association));
@@ -57,10 +63,10 @@ public class AssociationServiceTest {
         assertEquals(expectedAssociation.getPurpose(), actualAssociation.getPurpose());
     }
 
-    private Association getAssociationMock() {
+    private Association getAssociationMock(Long id, String name) {
         return Association.builder()
-                .associationId(ASSOCIATION_ID)
-                .name("People together")
+                .associationId(id)
+                .name(name)
                 .purpose("raise money for sick children")
                 .build();
     }
@@ -76,17 +82,8 @@ public class AssociationServiceTest {
 
     @Test
     public void testGetAllAssociations() {
-        Association association = Association.builder()
-                .associationId(ASSOCIATION_ID)
-                .name("People together")
-                .purpose("raise money for sick children")
-                .build();
-
-        Association association2 = Association.builder()
-                .associationId(ASSOCIATION_ID + 1L)
-                .name("People")
-                .purpose("raise money for sick children")
-                .build();
+        Association association = getAssociationMock(ASSOCIATION_ID, "People together");
+        Association association2 = getAssociationMock(ASSOCIATION_ID + 1L, "Together");
 
         List<Association> associations = Arrays.asList(association, association2);
 
@@ -111,25 +108,26 @@ public class AssociationServiceTest {
         Association association = new Association();
         AssociationDto associationDto = new AssociationDto();
 
-        when(associationRepository.save(any())).thenReturn(association);
+        when(associationRepository.save(any(Association.class))).thenReturn(association);
 
         associationService.createNewAssociation(associationDto);
 
-        verify(associationRepository).save(any());
+        verify(associationRepository).save(any(Association.class));
     }
 
     @Test
     public void testUpdateAssociation() {
-        Association association = Association.builder().associationId(ASSOCIATION_ID).build();
+        Association association = getAssociationMock(ASSOCIATION_ID, "People together");
         AssociationDto associationDto = ModelToDto.associationToDto(association);
+        associationDto.setPurpose("");
 
         when(associationRepository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(association));
-        when(associationRepository.save(any())).thenReturn(association);
+        when(associationRepository.save(any(Association.class))).thenReturn(association);
 
         associationService.updateAssociation(associationDto);
 
         verify(associationRepository).findById(anyLong());
-        verify(associationRepository).save(any());
+        verify(associationRepository).save(any(Association.class));
     }
 
     @Test
@@ -144,8 +142,9 @@ public class AssociationServiceTest {
     }
 
     @Test
-    public void testDeleteAssociation() {
-        Association association = Association.builder().associationId(ASSOCIATION_ID).build();
+    public void testDeleteAssociation_whenNoCharityPeople() {
+        Association association = getAssociationMock(ASSOCIATION_ID, "People together");
+        association.setCharityPeople(new ArrayList<>());
 
         when(associationRepository.findById(ASSOCIATION_ID)).thenReturn(Optional.ofNullable(association));
         doNothing().when(associationRepository).delete(association);
@@ -153,7 +152,55 @@ public class AssociationServiceTest {
         associationService.deleteAssociation(ASSOCIATION_ID);
 
         verify(associationRepository).findById(anyLong());
-        verify(associationRepository).delete(any());
+        verify(associationRepository).delete(any(Association.class));
+    }
+
+    @Test
+    public void testDeleteAssociation_withCharityPeople() {
+        Association association = getAssociationMock(ASSOCIATION_ID, "People together");
+        CharityPerson charityPerson = CharityPerson.builder()
+                .personCnp("x")
+                .association(association)
+                .build();
+        association.setCharityPeople(List.of(charityPerson));
+
+        when(associationRepository.findById(ASSOCIATION_ID)).thenReturn(Optional.ofNullable(association));
+        when(associationRepository.findAll()).thenReturn(List.of(association));
+        doNothing().when(charityPersonRepository).deleteAll();
+        doNothing().when(associationRepository).delete(association);
+
+        associationService.deleteAssociation(ASSOCIATION_ID);
+
+        verify(associationRepository).findById(anyLong());
+        verify(associationRepository).findAll();
+        verify(charityPersonRepository).deleteAll();
+        verify(associationRepository).delete(any(Association.class));
+    }
+
+    @Test
+    public void testDeleteAssociation_withAvailableAssociations() {
+        Association association = getAssociationMock(ASSOCIATION_ID, "People together");
+        Association association2 = getAssociationMock(ASSOCIATION_ID + 1L, "Together");
+        CharityPerson charityPerson = CharityPerson.builder()
+                .personCnp("x")
+                .association(association)
+                .build();
+        association.setCharityPeople(List.of(charityPerson));
+        association2.setCharityPeople(new ArrayList<>());
+
+        when(associationRepository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(association));
+        when(associationRepository.findAll()).thenReturn(Arrays.asList(association, association2));
+        when(charityPersonRepository.findByPersonCnp("x")).thenReturn(Optional.of(charityPerson));
+        when(charityPersonRepository.save(any(CharityPerson.class))).thenReturn(charityPerson);
+        doNothing().when(associationRepository).delete(association);
+
+        associationService.deleteAssociation(ASSOCIATION_ID);
+
+        verify(associationRepository).findById(anyLong());
+        verify(associationRepository).findAll();
+        verify(charityPersonRepository).findByPersonCnp(anyString());
+        verify(charityPersonRepository).save(any(CharityPerson.class));
+        verify(associationRepository).delete(any(Association.class));
     }
 
     @Test

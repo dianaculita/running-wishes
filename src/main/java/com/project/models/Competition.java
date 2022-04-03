@@ -38,19 +38,24 @@ public class Competition {
     @JoinColumn(name = "sport_id", nullable = false)
     private Sport sport;
 
-    @ManyToMany(mappedBy = "participatesToCompetitions")
-    private List<Participant> participants;
-
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     @JoinColumn(name = "competition_id")
     private List<Donation> donations;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinTable(
             name = "sponsor_has",
             joinColumns = @JoinColumn(name = "competition_id"),
             inverseJoinColumns = @JoinColumn(name = "sponsor_id")
     )
     private List<Sponsor> sponsors;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinTable(
+            name = "participates_to",
+            joinColumns = @JoinColumn(name = "competition_id"),
+            inverseJoinColumns = @JoinColumn(name = "participant_cnp")
+    )
+    private List<Participant> participants;
 
 }

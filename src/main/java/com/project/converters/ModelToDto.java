@@ -56,7 +56,7 @@ public class ModelToDto {
     }
 
     public static ParticipantDto participantToDto(Participant participant) {
-        List<Long> competitionsIds = participant.getParticipatesToCompetitions().stream()
+        List<Long> competitionsIds = participant.getCompetitions().stream()
                 .map(Competition::getCompetitionId)
                 .collect(Collectors.toList());
 
@@ -75,6 +75,7 @@ public class ModelToDto {
         return SponsorDto.builder()
                 .sponsorId(sponsor.getSponsorId())
                 .name(sponsor.getName())
+                .sponsoringFunds(sponsor.getSponsoringFunds())
                 .competitionsIds(competitionsIds)
                 .build();
     }
