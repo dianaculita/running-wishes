@@ -4,6 +4,7 @@ import com.project.clients.AuthenticationClient;
 import com.project.dtos.auth.LoginDto;
 import com.project.dtos.auth.RefreshTokenDto;
 import com.project.dtos.auth.TokenDto;
+import com.project.exceptions.UserNotFoundException;
 import com.project.models.User;
 import com.project.repositories.auth.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import javax.ws.rs.NotFoundException;
 import java.util.Optional;
 
 @Service
@@ -36,7 +36,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Optional<User> inAppUser = userRepository.findByUsername(loginDto.getUsername());
 
         if (!inAppUser.isPresent()) {
-            throw new NotFoundException("The user doesn't exist!");
+            throw new UserNotFoundException();
         }
 
         MultiValueMap<String, String> loginCredentials = new LinkedMultiValueMap<>();
