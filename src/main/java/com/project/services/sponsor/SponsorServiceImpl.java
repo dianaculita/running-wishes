@@ -2,6 +2,7 @@ package com.project.services.sponsor;
 
 import com.project.converters.ModelToDto;
 import com.project.dtos.SponsorDto;
+import com.project.exceptions.SponsorAlreadyExistsException;
 import com.project.models.Competition;
 import com.project.models.Sponsor;
 import com.project.repositories.CompetitionRepository;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.ws.rs.BadRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,62 +56,84 @@ public class SponsorServiceImpl implements SponsorService {
      */
     @Override
     public Long createNewSponsor(SponsorDto sponsorDto) {
-        List<Long> competitionsIds = sponsorDto.getCompetitionsIds();
-
         Sponsor sponsor = Sponsor.builder()
                 .name(sponsorDto.getName())
-                .competitions(sponsors(competitionsIds))
                 .sponsoringFunds(sponsorDto.getSponsoringFunds())
                 .build();
 
-        updateCompetitionsFundraisingBudget(competitionsIds, sponsorDto.getSponsoringFunds());
+        sponsor = sponsorRepository.save(sponsor);
+        updateCompetitionsFundraisingBudget(sponsor, sponsorDto.getCompetitionsIds(), sponsorDto.getSponsoringFunds());
 
-        return sponsorRepository.save(sponsor).getSponsorId();
+        return sponsor.getSponsorId();
     }
 
-    private List<Competition> sponsors(List<Long> ids) {
-        return competitionRepository.findByCompetitionIdIn(ids);
-    }
+    private void updateCompetitionsFundraisingBudget(Sponsor sponsor, List<Long> competitionsIds, Double sponsoringFunds) {
+        final Sponsor sponsorFinal = sponsor;
 
-    private void updateCompetitionsFundraisingBudget(List<Long> competitions, Double sponsoringFunds) {
-        for (Long competitionId : competitions) {
-            Competition competition = competitionRepository.getById(competitionId);
-
-            Double existingFunds = competition.getRaisedMoney();
-            competition.setRaisedMoney(existingFunds + sponsoringFunds);
-
-            competitionRepository.save(competition);
-        }
+        competitionsIds.forEach(id -> {
+            Competition competition = competitionRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            if (!competition.getSponsors().contains(sponsor)) { // if a collaboration isn't already established
+                competition.getSponsors().add(sponsorFinal);
+                competition.setRaisedMoney(competition.getRaisedMoney() + sponsoringFunds);
+                competitionRepository.save(competition);
+            }
+        });
     }
 
     /**
-     * If updating a sponsor means changing its fundraising budget, then all the associated competitions
-     * need to update their existing funds -> the old sponsor fundraising budget will be extracted
-     * from the existing funds and the new budget will be added
-     * The sponsor can not withdraw from a collaboration with a competition
+     * The sponsoring fund is fixed and can not be changed by update
+     * The sponsor can withdraw from a collaboration with a competition, or can add more collaborations
+     * with competitions and in this case, update on the collaboration between sponsor and competition(s) is needed
      */
     @Override
     public void updateSponsor(SponsorDto sponsorDto) {
         Sponsor sponsor = getById(sponsorDto.getSponsorId());
 
-        List<Long> competitionsIds = sponsor.getCompetitions().stream()
+        List<Long> oldCompetitionsIds = sponsor.getCompetitions().stream()
                 .map(Competition::getCompetitionId)
                 .collect(Collectors.toList());
 
-        updateCompetitionsFundraisingBudget(competitionsIds, (-1) * sponsor.getSponsoringFunds());
-
         sponsor.setName(sponsorDto.getName());
-        sponsor.setSponsoringFunds(sponsorDto.getSponsoringFunds());
-        sponsor.setCompetitions(sponsors(sponsorDto.getCompetitionsIds()));
-
-        updateCompetitionsFundraisingBudget(sponsorDto.getCompetitionsIds(), sponsorDto.getSponsoringFunds());
-
         sponsorRepository.save(sponsor);
+
+        List<Long> updatedCompetitionsIds = sponsorDto.getCompetitionsIds();
+
+        if (updatedCompetitionsIds.equals(oldCompetitionsIds) && oldCompetitionsIds.size() > 0) { //unnecessary update
+            throw new SponsorAlreadyExistsException();
+        }
+
+        if (!sponsor.getSponsoringFunds().equals(sponsorDto.getSponsoringFunds())) {
+            throw new BadRequestException("Sponsoring funds can not be changed!");
+        }
+
+        if (updatedCompetitionsIds.size() < oldCompetitionsIds.size()) { // if any collaboration is suspended, it needs
+            // to be removed from the competition and the competition fundraising budget needs to be updated
+            oldCompetitionsIds.removeAll(updatedCompetitionsIds);
+            oldCompetitionsIds.forEach(competitionId -> {
+                removeSponsoringFunds(sponsor, competitionId);
+            });
+        }
+
+        updateCompetitionsFundraisingBudget(sponsor, updatedCompetitionsIds, sponsorDto.getSponsoringFunds());
+        sponsorRepository.save(sponsor);
+    }
+
+    private void removeSponsoringFunds(Sponsor sponsor, Long competitionId) {
+        Competition competition = competitionRepository.getById(competitionId);
+        competition.setRaisedMoney(competition.getRaisedMoney() - sponsor.getSponsoringFunds());
+        competition.getSponsors().remove(sponsor);
+        competitionRepository.save(competition);
     }
 
     @Override
     public void deleteSponsor(Long id) {
-        sponsorRepository.delete(getById(id));
+        Sponsor sponsor = getById(id);
+        sponsor.getCompetitions().stream()
+                .map(Competition::getCompetitionId)
+                .forEach(compId -> removeSponsoringFunds(sponsor, compId));
+
+        sponsorRepository.delete(sponsor);
     }
 
 }

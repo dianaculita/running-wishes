@@ -75,6 +75,7 @@ public class ModelToDto {
         return SponsorDto.builder()
                 .sponsorId(sponsor.getSponsorId())
                 .name(sponsor.getName())
+                .sponsoringFunds(sponsor.getSponsoringFunds())
                 .competitionsIds(competitionsIds)
                 .build();
     }
