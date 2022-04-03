@@ -152,13 +152,16 @@ public class CompetitionServiceTest {
     @Test
     public void testDeleteCompetition() {
         Competition competition = new Competition();
+        competition.setSponsors(new ArrayList<>());
 
         when(competitionRepository.findById(COMPETITION_ID)).thenReturn(Optional.of(competition));
+        when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
         doNothing().when(competitionRepository).delete(competition);
 
         competitionService.deleteCompetition(COMPETITION_ID);
 
         verify(competitionRepository).findById(anyLong());
+        verify(competitionRepository).save(any(Competition.class));
         verify(competitionRepository).delete(any(Competition.class));
     }
 
