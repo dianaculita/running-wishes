@@ -12,5 +12,4 @@ public interface DonationService {
 
     Long createNewDonation(DonationDto donationDto);
 
-    void deleteDonation(Long id);
 }
