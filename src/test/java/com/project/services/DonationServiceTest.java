@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -97,15 +98,13 @@ public class DonationServiceTest {
     @Test
     public void testCreateNewDonation() {
         CharityPerson charityPerson = getCharityPersonMock("5180101253377", 1000.0, 0.0, 123L);
+        charityPerson.setDonations(new ArrayList<>());
         CharityPerson charityPerson2 = getCharityPersonMock("6180101253370", 1000.0, 100.0, 125L);
 
         Competition competition = getCompetitionMock(1500.0);
         Double donationFund = 0.02 * competition.getRaisedMoney();
 
         List<CharityPerson> charityPersons = Arrays.asList(charityPerson, charityPerson2);
-        competition.setRaisedMoney(competition.getRaisedMoney() - donationFund);
-
-        charityPerson.setRaisedFund(charityPerson.getRaisedFund() + donationFund);
 
         Donation donation = Donation.builder()
                 .competition(competition)
@@ -118,9 +117,9 @@ public class DonationServiceTest {
         when(charityPersonRepository.findAll()).thenReturn(charityPersons);
         when(competitionRepository.getById(COMPETITION_ID)).thenReturn(competition);
         when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
+        when(donationRepository.save(any(Donation.class))).thenReturn(donation);
         when(charityPersonRepository.findByPersonCnp("5180101253377")).thenReturn(Optional.ofNullable(charityPerson));
         when(charityPersonRepository.save(any(CharityPerson.class))).thenReturn(charityPerson);
-        when(donationRepository.save(any(Donation.class))).thenReturn(donation);
 
         donationService.createNewDonation(donationDto);
 
@@ -129,6 +128,7 @@ public class DonationServiceTest {
         verify(charityPersonRepository).save(any(CharityPerson.class));
         verify(competitionRepository, times(2)).getById(anyLong());
         verify(competitionRepository).save(any(Competition.class));
+        verify(donationRepository).save(any(Donation.class));
     }
 
     @Test

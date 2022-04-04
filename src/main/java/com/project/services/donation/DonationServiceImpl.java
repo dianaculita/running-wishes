@@ -71,10 +71,10 @@ public class DonationServiceImpl implements DonationService {
                 .charityPerson(needingPerson)
                 .totalFunds(totalFunds)
                 .build();
+        donation = donationRepository.save(donation);
+        updateCharityPersonRaisedFund(needingPerson.getPersonCnp(), totalFunds, donation);
 
-        updateCharityPersonRaisedFund(needingPerson.getPersonCnp(), totalFunds);
-
-        return donationRepository.save(donation).getDonationId();
+        return donation.getDonationId();
     }
 
     private Competition getCompetition(DonationDto donationDto) {
@@ -121,12 +121,13 @@ public class DonationServiceImpl implements DonationService {
         competitionRepository.save(competition);
     }
 
-    private void updateCharityPersonRaisedFund(String cnp, Double raisedFund) {
+    private void updateCharityPersonRaisedFund(String cnp, Double raisedFund, Donation donation) {
         CharityPerson charityPerson = charityPersonRepository.findByPersonCnp(cnp)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         Double existingFund = charityPerson.getRaisedFund();
         charityPerson.setRaisedFund(raisedFund + existingFund);
+        charityPerson.getDonations().add(donation);
 
         charityPersonRepository.save(charityPerson);
     }
