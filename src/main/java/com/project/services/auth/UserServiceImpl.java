@@ -10,6 +10,8 @@ import com.project.repositories.auth.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -23,6 +25,17 @@ public class UserServiceImpl implements UserService {
         this.keycloakAdminService = keycloakAdminService;
     }
 
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    /**
+     * Registers new user with given username, password and role
+     * Role can be "ROLE_ADMIN" or "ROLE_USER"
+     * @param registerUserDto contains username, password, role
+     * @return token for access token, as login is also performed
+     */
     @Override
     public TokenDto registerUser(RegisterUserDto registerUserDto) {
         if (userRepository.existsByUsername(registerUserDto.getUsername())) {
@@ -38,6 +51,10 @@ public class UserServiceImpl implements UserService {
         return keycloakAdminService.addUserToKeycloak(userId, registerUserDto.getPassword(), registerUserDto.getRole());
     }
 
+    /**
+     * Changes password for a user
+     * @param changePasswordDto contains username, new password
+     */
     @Override
     public void changePassword(ChangePasswordDto changePasswordDto) {
         if (!userRepository.existsByUsername(changePasswordDto.getUsername())) {

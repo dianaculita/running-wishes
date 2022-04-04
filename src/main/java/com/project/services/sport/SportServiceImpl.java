@@ -49,15 +49,6 @@ public class SportServiceImpl implements SportService {
     }
 
     @Override
-    public void updateSport(SportDto sportDto) {
-        Sport sport = getById(sportDto.getSportId());
-
-        sport.setName(sportDto.getName());
-
-        sportRepository.save(sport);
-    }
-
-    @Override
     public void deleteSport(Long id) {
         sportRepository.delete(getById(id));
     }

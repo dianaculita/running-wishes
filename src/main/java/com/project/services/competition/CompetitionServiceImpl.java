@@ -7,12 +7,14 @@ import com.project.models.Competition;
 import com.project.models.Sponsor;
 import com.project.models.Sport;
 import com.project.repositories.CompetitionRepository;
+import com.project.repositories.DonationRepository;
 import com.project.services.sport.SportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.ws.rs.BadRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,11 +25,15 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     private final SportService sportService;
 
+    private final DonationRepository donationRepository;
+
     @Autowired
     public CompetitionServiceImpl(CompetitionRepository competitionRepository,
-                                  SportService sportService) {
+                                  SportService sportService,
+                                  DonationRepository donationRepository) {
         this.competitionRepository = competitionRepository;
         this.sportService = sportService;
+        this.donationRepository = donationRepository;
     }
 
     @Override
@@ -47,6 +53,10 @@ public class CompetitionServiceImpl implements CompetitionService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * When a competition is created, it has no assigned participants or sponsors; they will be
+     * updated later from requests made by the participants/sponors
+     */
     @Override
     public Long createNewCompetition(CompetitionDto competitionDto) {
         Competition competition = Competition.builder()
@@ -79,12 +89,21 @@ public class CompetitionServiceImpl implements CompetitionService {
         competitionRepository.save(competition);
     }
 
+    /**
+     * When deleting a competition, sponsors will not be deleted
+     * If a competition has already made donations, it can not be deleted, as the money
+     * have already been sent
+     */
     @Override
     public void deleteCompetition(Long id) {
         Competition competition = getById(id);
         List<Sponsor> sponsors = competition.getSponsors();
         competition.getSponsors().removeAll(sponsors);
         competitionRepository.save(competition);
+
+        if (competition.getDonations().size() > 0) {
+            throw new BadRequestException("Competition can not be deleted as donations are in progress!");
+        }
 
         competitionRepository.delete(competition);
     }

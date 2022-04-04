@@ -74,6 +74,7 @@ public class CompetitionServiceTest {
                 .location("Bucharest")
                 .sport(sport)
                 .participants(new ArrayList<>())
+                .sponsors(new ArrayList<>())
                 .build();
 
         return competition;
@@ -153,6 +154,7 @@ public class CompetitionServiceTest {
     public void testDeleteCompetition() {
         Competition competition = new Competition();
         competition.setSponsors(new ArrayList<>());
+        competition.setDonations(new ArrayList<>());
 
         when(competitionRepository.findById(COMPETITION_ID)).thenReturn(Optional.of(competition));
         when(competitionRepository.save(any(Competition.class))).thenReturn(competition);

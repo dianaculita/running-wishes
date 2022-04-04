@@ -6,6 +6,7 @@ import com.project.models.Association;
 import com.project.models.CharityPerson;
 import com.project.repositories.AssociationRepository;
 import com.project.repositories.CharityPersonRepository;
+import com.project.services.charity.CharityPersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,11 +23,15 @@ public class AssociationServiceImpl implements AssociationService {
 
     private final CharityPersonRepository charityPersonRepository;
 
+    private final CharityPersonService charityPersonService;
+
     @Autowired
     public AssociationServiceImpl(AssociationRepository associationRepository,
-                                  CharityPersonRepository charityPersonRepository) {
+                                  CharityPersonRepository charityPersonRepository,
+                                  CharityPersonService charityPersonService) {
         this.associationRepository = associationRepository;
         this.charityPersonRepository = charityPersonRepository;
+        this.charityPersonService = charityPersonService;
     }
 
     @Override
@@ -51,6 +56,7 @@ public class AssociationServiceImpl implements AssociationService {
         Association association = Association.builder()
                 .name(associationDto.getName())
                 .purpose(associationDto.getPurpose())
+                .charityPeople(new ArrayList<>())
                 .build();
 
         return associationRepository.save(association).getAssociationId();
@@ -91,13 +97,23 @@ public class AssociationServiceImpl implements AssociationService {
                 updateCharityPeople(cnps, newAssociation);
                 association.setCharityPeople(new ArrayList<>());
             } else {
-                charityPersonRepository.deleteAll();
+                List<CharityPerson> charityPersons = association.getCharityPeople();
+                charityPersons.forEach(person -> {
+                    charityPersonService.deleteCharityPerson(person.getPersonCnp());
+                });
+                association.getCharityPeople().removeAll(charityPersons);
+                associationRepository.save(association);
             }
         }
 
         associationRepository.delete(association);
     }
 
+    /**
+     * Updates all the charity persons from an association that is requested to be deleted
+     * @param charityPeopleCnp - charity persons to be updated
+     * @param association - the available association to which the charity people will be transferred
+     */
     private void updateCharityPeople(List<String> charityPeopleCnp, Association association) {
         charityPeopleCnp.forEach(cnp -> {
             CharityPerson charityPerson = charityPersonRepository.findByPersonCnp(cnp)

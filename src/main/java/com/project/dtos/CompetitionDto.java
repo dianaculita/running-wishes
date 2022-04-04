@@ -33,4 +33,6 @@ public class CompetitionDto {
     private Double raisedMoney;
 
     private List<String> usersCnp;
+
+    private List<String> sponsors;
 }

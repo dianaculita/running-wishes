@@ -12,10 +12,15 @@ import java.util.stream.Collectors;
 public class ModelToDto {
 
     public static AssociationDto associationToDto(Association association) {
+        List<String> charities = association.getCharityPeople().stream()
+                .map(CharityPerson::getPersonCnp)
+                .collect(Collectors.toList());
+
         return AssociationDto.builder()
                 .associationId(association.getAssociationId())
                 .name(association.getName())
                 .purpose(association.getPurpose())
+                .charityPersons(charities)
                 .build();
     }
 
@@ -42,6 +47,9 @@ public class ModelToDto {
         List<String> participants = competition.getParticipants().stream()
                 .map(Participant::getCnp)
                 .collect(Collectors.toList());
+        List<String> sponsors = competition.getSponsors().stream()
+                .map(Sponsor::getName)
+                .collect(Collectors.toList());
 
         return CompetitionDto.builder()
                 .competitionId(competition.getCompetitionId())
@@ -52,6 +60,7 @@ public class ModelToDto {
                 .raisedMoney(competition.getRaisedMoney())
                 .sportId(competition.getSport().getSportId())
                 .usersCnp(participants)
+                .sponsors(sponsors)
                 .build();
     }
 

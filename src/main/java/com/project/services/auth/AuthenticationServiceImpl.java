@@ -32,6 +32,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Performs login for a user with given username, password and grantType being "password"
+     * @param loginDto contains username, password, grantType
+     * @return a token that contains the user authentication access token
+     */
     public TokenDto login(LoginDto loginDto) {
         Optional<User> inAppUser = userRepository.findByUsername(loginDto.getUsername());
 
@@ -49,6 +54,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return authenticationClient.login(loginCredentials);
     }
 
+    /**
+     * Requests a new access token based on the refresh token (must not have been expired),
+     * if the old access token has expired
+     * @param refreshTokenDto contains the refresh token and grantType being "grant_type"
+     * @return a token that contains new authentication access token
+     */
     public TokenDto refresh(RefreshTokenDto refreshTokenDto) {
         MultiValueMap<String, String> refreshCredentials = new LinkedMultiValueMap<>();
 

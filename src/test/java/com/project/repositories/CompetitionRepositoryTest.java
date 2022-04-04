@@ -20,6 +20,7 @@ public class CompetitionRepositoryTest {
 
     @Autowired
     private CompetitionRepository competitionRepository;
+
     private Sport sport;
 
     @Autowired
