@@ -77,18 +77,6 @@ public class SportControllerTest {
     }
 
     @Test
-    public void testUpdateSport() {
-        SportDto sportDto = new SportDto();
-        sportDto.setSportId(SPORT_ID);
-
-        doNothing().when(sportService).updateSport(sportDto);
-
-        sportController.updateSport(sportDto);
-
-        verify(sportService).updateSport(any());
-    }
-
-    @Test
     public void testDeleteSport() {
         doNothing().when(sportService).deleteSport(SPORT_ID);
 

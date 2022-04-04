@@ -103,32 +103,6 @@ public class SportServiceTest {
     }
 
     @Test
-    public void testUpdateSport() {
-        Sport sport = getSportMock(SPORT_ID, "running");
-        SportDto sportDto = ModelToDto.sportToDto(sport);
-
-        when(sportRepository.findById(SPORT_ID)).thenReturn(Optional.of(sport));
-        when(sportRepository.save(any(Sport.class))).thenReturn(sport);
-
-        sportService.updateSport(sportDto);
-
-        verify(sportRepository).findById(anyLong());
-        verify(sportRepository).save(any(Sport.class));
-    }
-
-    @Test
-    public void testUpdateSport_shouldThrowNotFoundException() {
-        SportDto sportDto = new SportDto();
-        sportDto.setSportId(SPORT_ID);
-
-        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(sportRepository).findById(SPORT_ID);
-
-        assertThrows(ResponseStatusException.class, () -> sportService.updateSport(sportDto));
-
-        verify(sportRepository).findById(anyLong());
-    }
-
-    @Test
     public void testDeleteSport() {
         Sport sport = new Sport();
         sport.setSportId(SPORT_ID);

@@ -12,7 +12,5 @@ public interface SportService {
 
     Long createNewSport(SportDto sportDto);
 
-    void updateSport(SportDto sportDto);
-
     void deleteSport(Long id);
 }
