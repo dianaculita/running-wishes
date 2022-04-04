@@ -94,8 +94,11 @@ public class ParticipantServiceImpl implements ParticipantService {
                 .map(Competition::getCompetitionId)
                 .collect(Collectors.toList());
 
-        if (competitionsIds.containsAll(participantDto.getCompetitionsIds())) {
+        if (competitionsIds.containsAll(participantDto.getCompetitionsIds()) &&
+                participantDto.getCompetitionsIds().size() > 0) {
             throw new ParticipantAlreadyEnrolledException();
+        } else if (participantDto.getCompetitionsIds().size() == 0 && competitionsIds.size() > 0){
+            throw new BadRequestException("The participant can not withdraw from a competition!");
         }
 
         updateCompetitionWithParticipant(participant, participantDto);
