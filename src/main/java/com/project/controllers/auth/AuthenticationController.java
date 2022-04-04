@@ -2,13 +2,12 @@ package com.project.controllers.auth;
 
 import com.project.dtos.auth.LoginDto;
 import com.project.dtos.auth.RefreshTokenDto;
+import com.project.dtos.auth.TokenDto;
 import com.project.services.auth.AuthenticationService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,20 +25,22 @@ public class AuthenticationController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Login Successful"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized Operation"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(LoginDto loginDto) {
-        return new ResponseEntity<>(authenticationService.login(loginDto), HttpStatus.OK);
+    public TokenDto login(LoginDto loginDto) {
+        return authenticationService.login(loginDto);
     }
 
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized Operation"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(RefreshTokenDto refreshTokenDto) {
-        return new ResponseEntity<>(authenticationService.refresh(refreshTokenDto), HttpStatus.OK);
+    public TokenDto refresh(RefreshTokenDto refreshTokenDto) {
+        return authenticationService.refresh(refreshTokenDto);
     }
 }
