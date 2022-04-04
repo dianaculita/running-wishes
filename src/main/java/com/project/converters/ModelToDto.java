@@ -42,6 +42,9 @@ public class ModelToDto {
         List<String> participants = competition.getParticipants().stream()
                 .map(Participant::getCnp)
                 .collect(Collectors.toList());
+        List<String> sponsors = competition.getSponsors().stream()
+                .map(Sponsor::getName)
+                .collect(Collectors.toList());
 
         return CompetitionDto.builder()
                 .competitionId(competition.getCompetitionId())
@@ -52,6 +55,7 @@ public class ModelToDto {
                 .raisedMoney(competition.getRaisedMoney())
                 .sportId(competition.getSport().getSportId())
                 .usersCnp(participants)
+                .sponsors(sponsors)
                 .build();
     }
 
