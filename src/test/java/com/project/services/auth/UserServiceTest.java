@@ -13,8 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import javax.ws.rs.BadRequestException;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -68,7 +69,9 @@ public class UserServiceTest {
 
         doThrow(new UserAlreadyExistsException()).when(userRepository).existsByUsername(username);
 
-        assertThrows(UserAlreadyExistsException.class, () -> userService.registerUser(registerUserDto));
+        BadRequestException exception = assertThrows(UserAlreadyExistsException.class,
+                () -> userService.registerUser(registerUserDto));
+        assertTrue(exception.getMessage().contains("The user with this username already exists!"));
 
         verify(userRepository).existsByUsername(anyString());
     }
@@ -98,7 +101,9 @@ public class UserServiceTest {
 
         doThrow(new UserNotFoundException()).when(userRepository).existsByUsername(username);
 
-        assertThrows(UserNotFoundException.class, () -> userService.changePassword(changePasswordDto));
+        BadRequestException exception = assertThrows(UserNotFoundException.class,
+                () -> userService.changePassword(changePasswordDto));
+        assertTrue(exception.getMessage().contains("This user does not exist!"));
 
         verify(userRepository).existsByUsername(anyString());
     }

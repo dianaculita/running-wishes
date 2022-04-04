@@ -23,8 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @DataJpaTest
@@ -236,7 +235,9 @@ public class SponsorServiceTest {
         when(sponsorRepository.findById(SPONSOR_ID)).thenReturn(Optional.of(sponsor));
         when(sponsorRepository.save(any(Sponsor.class))).thenReturn(sponsor);
 
-        assertThrows(SponsorAlreadyExistsException.class, () -> sponsorService.updateSponsor(sponsorDto));
+        RuntimeException exception = assertThrows(SponsorAlreadyExistsException.class,
+                () -> sponsorService.updateSponsor(sponsorDto));
+        assertTrue(exception.getMessage().contains("The sponsor already has a contract with the competition(s) requested!"));
 
         verify(sponsorRepository).findById(anyLong());
         verify(sponsorRepository).save(any(Sponsor.class));
@@ -252,7 +253,9 @@ public class SponsorServiceTest {
         when(sponsorRepository.findById(SPONSOR_ID)).thenReturn(Optional.of(sponsor));
         when(sponsorRepository.save(any(Sponsor.class))).thenReturn(sponsor);
 
-        assertThrows(BadRequestException.class, () -> sponsorService.updateSponsor(sponsorDto));
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> sponsorService.updateSponsor(sponsorDto));
+        assertTrue(exception.getMessage().contains("Sponsoring funds can not be changed!"));
 
         verify(sponsorRepository).findById(anyLong());
         verify(sponsorRepository).save(any(Sponsor.class));

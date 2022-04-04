@@ -22,8 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @DataJpaTest
@@ -183,7 +182,9 @@ public class ParticipantServiceTest {
 
         when(participantRepository.findByCnp(CNP)).thenReturn(Optional.ofNullable(participant));
 
-        assertThrows(ParticipantAlreadyEnrolledException.class, () -> participantService.updateParticipant(updatedParticipant));
+        RuntimeException exception = assertThrows(ParticipantAlreadyEnrolledException.class,
+                () -> participantService.updateParticipant(updatedParticipant));
+        assertTrue(exception.getMessage().contains("This participant is already enrolled to the competition(s) requested!"));
 
         verify(participantRepository).findByCnp(anyString());
     }
@@ -216,7 +217,9 @@ public class ParticipantServiceTest {
         Participant participant = getParticipantMock(CNP, "Jane");
         when(participantRepository.findByCnp(CNP)).thenReturn(Optional.ofNullable(participant));
 
-        assertThrows(BadRequestException.class, () -> participantService.deleteParticipant(CNP));
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> participantService.deleteParticipant(CNP));
+        assertTrue(exception.getMessage().contains("The participant can not withdraw from a competition!"));
 
         verify(participantRepository).findByCnp(anyString());
     }

@@ -22,8 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @DataJpaTest
@@ -157,6 +156,7 @@ public class CompetitionServiceTest {
         Competition competition = new Competition();
         competition.setSponsors(new ArrayList<>());
         competition.setDonations(new ArrayList<>());
+        competition.setParticipants(new ArrayList<>());
 
         when(competitionRepository.findById(COMPETITION_ID)).thenReturn(Optional.of(competition));
         when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
@@ -189,7 +189,9 @@ public class CompetitionServiceTest {
         when(competitionRepository.findById(COMPETITION_ID)).thenReturn(Optional.of(competition));
         when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
 
-        assertThrows(BadRequestException.class, () -> competitionService.deleteCompetition(COMPETITION_ID));
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> competitionService.deleteCompetition(COMPETITION_ID));
+        assertTrue(exception.getMessage().contains("Competition can not be deleted as donations are in progress!"));
 
         verify(competitionRepository).findById(anyLong());
         verify(competitionRepository).save(any(Competition.class));
