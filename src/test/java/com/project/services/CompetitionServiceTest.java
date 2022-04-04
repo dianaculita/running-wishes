@@ -74,6 +74,7 @@ public class CompetitionServiceTest {
                 .location("Bucharest")
                 .sport(sport)
                 .participants(new ArrayList<>())
+                .sponsors(new ArrayList<>())
                 .build();
 
         return competition;
