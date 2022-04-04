@@ -5,6 +5,7 @@ import com.project.dtos.CharityPersonDto;
 import com.project.models.Association;
 import com.project.models.CharityPerson;
 import com.project.repositories.CharityPersonRepository;
+import com.project.repositories.DonationRepository;
 import com.project.services.association.AssociationServiceImpl;
 import com.project.services.charity.CharityPersonServiceImpl;
 import org.junit.jupiter.api.AfterEach;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +37,9 @@ public class CharityPersonServiceTest {
 
     @Mock
     private AssociationServiceImpl associationService;
+
+    @Mock
+    private DonationRepository donationRepository;
 
     @InjectMocks
     private CharityPersonServiceImpl charityPersonService;
@@ -161,13 +166,16 @@ public class CharityPersonServiceTest {
     public void testDeleteCharityPerson() {
         Association association = Association.builder().associationId(ASSOCIATION_ID).build();
         CharityPerson charityPerson = getCharityPersonMock("Mike", 1L, association, PERSON_CNP);
+        charityPerson.setDonations(new ArrayList<>());
 
         when(charityPersonRepository.findByPersonCnp(PERSON_CNP)).thenReturn(Optional.of(charityPerson));
+        doNothing().when(donationRepository).deleteAll(charityPerson.getDonations());
         doNothing().when(charityPersonRepository).delete(charityPerson);
 
         charityPersonService.deleteCharityPerson(PERSON_CNP);
 
         verify(charityPersonRepository).findByPersonCnp(anyString());
+        verify(donationRepository).deleteAll(anyList());
         verify(charityPersonRepository).delete(any(CharityPerson.class));
     }
 

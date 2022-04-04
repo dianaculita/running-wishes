@@ -5,7 +5,9 @@ import com.project.converters.ModelToDto;
 import com.project.dtos.CharityPersonDto;
 import com.project.models.Association;
 import com.project.models.CharityPerson;
+import com.project.models.Donation;
 import com.project.repositories.CharityPersonRepository;
+import com.project.repositories.DonationRepository;
 import com.project.services.association.AssociationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,11 +24,15 @@ public class CharityPersonServiceImpl implements CharityPersonService {
 
     private final AssociationService associationService;
 
+    private final DonationRepository donationRepository;
+
     @Autowired
     public CharityPersonServiceImpl(CharityPersonRepository charityPersonRepository,
-                                    AssociationService associationService) {
+                                    AssociationService associationService,
+                                    DonationRepository donationRepository) {
         this.charityPersonRepository = charityPersonRepository;
         this.associationService = associationService;
+        this.donationRepository = donationRepository;
     }
 
     @Override
@@ -83,7 +89,11 @@ public class CharityPersonServiceImpl implements CharityPersonService {
 
     @Override
     public void deleteCharityPerson(String cnp) {
-        charityPersonRepository.delete(getByCnp(cnp));
+        CharityPerson charityPerson = getByCnp(cnp);
+        List<Donation> donations = charityPerson.getDonations();
+        donationRepository.deleteAll(donations);
+
+        charityPersonRepository.delete(charityPerson);
     }
 
 }
