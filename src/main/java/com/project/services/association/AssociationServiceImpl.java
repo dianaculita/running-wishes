@@ -98,6 +98,11 @@ public class AssociationServiceImpl implements AssociationService {
         associationRepository.delete(association);
     }
 
+    /**
+     * Updates all the charity persons from an association that is requested to be deleted
+     * @param charityPeopleCnp - charity persons to be updated
+     * @param association - the available association to which the charity people will be transferred
+     */
     private void updateCharityPeople(List<String> charityPeopleCnp, Association association) {
         charityPeopleCnp.forEach(cnp -> {
             CharityPerson charityPerson = charityPersonRepository.findByPersonCnp(cnp)

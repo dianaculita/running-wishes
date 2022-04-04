@@ -48,11 +48,11 @@ public class SponsorServiceImpl implements SponsorService {
     }
 
     /**
-     * When the sponsor is created, it will be associated with a competition, meaning that it will
-     * sponsor that competition (or each competition if more) with a fixed amount of money - sponsoringFunds
-     * As soon as the collaboration between a sponsor and a competition is established, the competition
-     * will benefit of the sponsoring funds and will save them for further donations, meaning that
-     * the competition fundraising budget will be updated
+     * When the sponsor is created, it will be associated with a competition; it will
+     * sponsor that competition (or each competition if more) with a fixed amount of money
+     * As soon as the collaboration between a sponsor and a competition is established,
+     * the competition will benefit of the sponsoring funds and will save them for further
+     * donations; the competition fundraising budget will be updated
      */
     @Override
     public Long createNewSponsor(SponsorDto sponsorDto) {
@@ -73,7 +73,9 @@ public class SponsorServiceImpl implements SponsorService {
         competitionsIds.forEach(id -> {
             Competition competition = competitionRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-            if (!competition.getSponsors().contains(sponsor)) { // if a collaboration isn't already established
+
+            // if a collaboration between sponsor and competition isn't already established
+            if (!competition.getSponsors().contains(sponsor)) {
                 competition.getSponsors().add(sponsorFinal);
                 competition.setRaisedMoney(competition.getRaisedMoney() + sponsoringFunds);
                 competitionRepository.save(competition);
@@ -83,8 +85,8 @@ public class SponsorServiceImpl implements SponsorService {
 
     /**
      * The sponsoring fund is fixed and can not be changed by update
-     * The sponsor can withdraw from a collaboration with a competition, or can add more collaborations
-     * with competitions and in this case, update on the collaboration between sponsor and competition(s) is needed
+     * The sponsor can withdraw from a collaboration with a competition,
+     * or can add more collaborations; update on each competition is needed
      */
     @Override
     public void updateSponsor(SponsorDto sponsorDto) {
@@ -99,7 +101,8 @@ public class SponsorServiceImpl implements SponsorService {
 
         List<Long> updatedCompetitionsIds = sponsorDto.getCompetitionsIds();
 
-        if (updatedCompetitionsIds.equals(oldCompetitionsIds) && oldCompetitionsIds.size() > 0) { //unnecessary update
+        // unnecessary update
+        if (updatedCompetitionsIds.equals(oldCompetitionsIds) && oldCompetitionsIds.size() > 0) {
             throw new SponsorAlreadyExistsException();
         }
 
@@ -107,8 +110,9 @@ public class SponsorServiceImpl implements SponsorService {
             throw new BadRequestException("Sponsoring funds can not be changed!");
         }
 
-        if (updatedCompetitionsIds.size() < oldCompetitionsIds.size()) { // if any collaboration is suspended, it needs
-            // to be removed from the competition and the competition fundraising budget needs to be updated
+        // if any collaboration is suspended, it needs to be removed from the competition
+        // and the competition fundraising budget needs to be updated
+        if (updatedCompetitionsIds.size() < oldCompetitionsIds.size()) {
             oldCompetitionsIds.removeAll(updatedCompetitionsIds);
             oldCompetitionsIds.forEach(competitionId -> {
                 removeSponsoringFunds(sponsor, competitionId);
@@ -126,6 +130,9 @@ public class SponsorServiceImpl implements SponsorService {
         competitionRepository.save(competition);
     }
 
+    /**
+     * When deleting a sponsor, each existent collaboration with a competition is updated
+     */
     @Override
     public void deleteSponsor(Long id) {
         Sponsor sponsor = getById(id);

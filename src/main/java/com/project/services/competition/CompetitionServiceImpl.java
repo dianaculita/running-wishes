@@ -47,6 +47,10 @@ public class CompetitionServiceImpl implements CompetitionService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * When a competition is created, it has no assigned participants or sponsors; they will be
+     * updated later from requests made by the participants/sponors
+     */
     @Override
     public Long createNewCompetition(CompetitionDto competitionDto) {
         Competition competition = Competition.builder()
@@ -79,6 +83,9 @@ public class CompetitionServiceImpl implements CompetitionService {
         competitionRepository.save(competition);
     }
 
+    /**
+     * When deleting a competition, sponsors will not be deleted
+     */
     @Override
     public void deleteCompetition(Long id) {
         Competition competition = getById(id);

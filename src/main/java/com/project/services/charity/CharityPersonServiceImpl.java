@@ -65,6 +65,9 @@ public class CharityPersonServiceImpl implements CharityPersonService {
         return DtoToModel.fromAssociationDto(associationService.getAssociationById(charityPersonDto.getAssociationId()));
     }
 
+    /**
+     * Once a charity person is enrolled to an association, he/she can not move to another association
+     */
     @Override
     public void updateCharityPerson(CharityPersonDto charityPersonDto) {
         CharityPerson charityPerson = getByCnp(charityPersonDto.getPersonCnp());
@@ -74,7 +77,6 @@ public class CharityPersonServiceImpl implements CharityPersonService {
         charityPerson.setStory(charityPersonDto.getStory());
         charityPerson.setRaisedFund(charityPersonDto.getRaisedFund());
         charityPerson.setNeededFund(charityPersonDto.getNeededFund());
-        charityPerson.setAssociation(getAssociation(charityPersonDto));
 
         charityPersonRepository.save(charityPerson);
     }

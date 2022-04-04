@@ -58,6 +58,10 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         this.realmResource = this.keycloak.realm(keycloakRealm);
     }
 
+    /**
+     * Adds a new registered user to the Keycloak realm and also logins the user
+     * @return token with access token
+     */
     public TokenDto addUserToKeycloak(Long userId, String password, String role) {
         UserRepresentation newUser = new UserRepresentation();
         newUser.setEnabled(true);
@@ -96,9 +100,9 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         }
     }
 
-    /*
-        the change of password verifies if the old password corresponds with the credentials
-        associated with the given username, to prevent the action taken by an unauthorized user
+    /**
+     * Changes the password for a given username. Does not perform login
+     * @param changePasswordDto contains the user's username and new password
      */
     public void changePassword(ChangePasswordDto changePasswordDto) {
         User user = userRepository.findByUsername(changePasswordDto.getUsername())

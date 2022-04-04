@@ -47,6 +47,9 @@ public class ParticipantServiceImpl implements ParticipantService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * A participant can enroll to the application with/without initial competitions to participate to
+     */
     @Override
     public String createNewParticipant(ParticipantDto participantDto) {
         Participant participant = Participant.builder()
@@ -60,6 +63,9 @@ public class ParticipantServiceImpl implements ParticipantService {
         return participant.getCnp();
     }
 
+    /**
+     * Updates the competition fundraising budget after adding a new participant
+     */
     private void updateCompetitionWithParticipant(Participant participant, ParticipantDto participantDto) {
         final Participant participantFinal = participant;
 
@@ -76,8 +82,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     /**
      * The participant can update his participation to competitions only by adding more competitions,
-     * meaning that the already bought ticket is non-refundable and the user can not withdraw
-     * from a competition
+     * meaning that the already bought ticket is non-refundable
      * The new added competitions will have their fundraising budget updated
      */
     @Override
@@ -99,7 +104,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     /**
      * If the participant to be deleted participates in any competition, then a Bad Request exception
-     * is thrown as the withdrawal is not permitted
+     * is thrown as the withdrawal from a competition is not permitted
      * The deletion of the participant is only possible if the competition list if empty
      */
     @Override
