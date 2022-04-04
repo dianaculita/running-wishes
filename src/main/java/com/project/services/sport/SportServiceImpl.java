@@ -48,9 +48,4 @@ public class SportServiceImpl implements SportService {
         return sportRepository.save(sport).getSportId();
     }
 
-    @Override
-    public void deleteSport(Long id) {
-        sportRepository.delete(getById(id));
-    }
-
 }
