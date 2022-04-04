@@ -1,14 +1,13 @@
 package com.project.services.charity;
 
-import com.project.converters.DtoToModel;
 import com.project.converters.ModelToDto;
 import com.project.dtos.CharityPersonDto;
 import com.project.models.Association;
 import com.project.models.CharityPerson;
 import com.project.models.Donation;
+import com.project.repositories.AssociationRepository;
 import com.project.repositories.CharityPersonRepository;
 import com.project.repositories.DonationRepository;
-import com.project.services.association.AssociationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,16 +21,16 @@ public class CharityPersonServiceImpl implements CharityPersonService {
 
     private final CharityPersonRepository charityPersonRepository;
 
-    private final AssociationService associationService;
+    private final AssociationRepository associationRepository;
 
     private final DonationRepository donationRepository;
 
     @Autowired
     public CharityPersonServiceImpl(CharityPersonRepository charityPersonRepository,
-                                    AssociationService associationService,
+                                    AssociationRepository associationRepository,
                                     DonationRepository donationRepository) {
         this.charityPersonRepository = charityPersonRepository;
-        this.associationService = associationService;
+        this.associationRepository = associationRepository;
         this.donationRepository = donationRepository;
     }
 
@@ -54,6 +53,7 @@ public class CharityPersonServiceImpl implements CharityPersonService {
 
     @Override
     public String createNewCharityPerson(CharityPersonDto charityPersonDto) {
+        Association association = getAssociation(charityPersonDto);
         CharityPerson charityPerson = CharityPerson.builder()
                 .personCnp(charityPersonDto.getPersonCnp())
                 .name(charityPersonDto.getName())
@@ -61,14 +61,20 @@ public class CharityPersonServiceImpl implements CharityPersonService {
                 .iban(charityPersonDto.getIban())
                 .neededFund(charityPersonDto.getNeededFund())
                 .raisedFund(charityPersonDto.getRaisedFund())
-                .association(getAssociation(charityPersonDto))
+                .association(association)
                 .build();
+        charityPerson = charityPersonRepository.save(charityPerson);
 
-        return charityPersonRepository.save(charityPerson).getPersonCnp();
+
+        association.getCharityPeople().add(charityPerson);
+        associationRepository.save(association);
+
+        return charityPerson.getPersonCnp();
     }
 
     private Association getAssociation(CharityPersonDto charityPersonDto) {
-        return DtoToModel.fromAssociationDto(associationService.getAssociationById(charityPersonDto.getAssociationId()));
+        return associationRepository.findById(charityPersonDto.getAssociationId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     /**
@@ -91,8 +97,9 @@ public class CharityPersonServiceImpl implements CharityPersonService {
     public void deleteCharityPerson(String cnp) {
         CharityPerson charityPerson = getByCnp(cnp);
         List<Donation> donations = charityPerson.getDonations();
-        donationRepository.deleteAll(donations);
-
+        if (donations.size() > 0) {
+            donationRepository.deleteAll(donations);
+        }
         charityPersonRepository.delete(charityPerson);
     }
 

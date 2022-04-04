@@ -12,10 +12,15 @@ import java.util.stream.Collectors;
 public class ModelToDto {
 
     public static AssociationDto associationToDto(Association association) {
+        List<String> charities = association.getCharityPeople().stream()
+                .map(CharityPerson::getPersonCnp)
+                .collect(Collectors.toList());
+
         return AssociationDto.builder()
                 .associationId(association.getAssociationId())
                 .name(association.getName())
                 .purpose(association.getPurpose())
+                .charityPersons(charities)
                 .build();
     }
 
