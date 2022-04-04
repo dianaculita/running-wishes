@@ -102,26 +102,4 @@ public class SportServiceTest {
         verify(sportRepository).save(any(Sport.class));
     }
 
-    @Test
-    public void testDeleteSport() {
-        Sport sport = new Sport();
-        sport.setSportId(SPORT_ID);
-
-        when(sportRepository.findById(SPORT_ID)).thenReturn(Optional.of(sport));
-        doNothing().when(sportRepository).delete(sport);
-
-        sportService.deleteSport(SPORT_ID);
-
-        verify(sportRepository).findById(anyLong());
-        verify(sportRepository).delete(any(Sport.class));
-    }
-
-    @Test
-    public void testDeleteSport_shouldThrowNotFoundException() {
-        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(sportRepository).findById(SPORT_ID);
-
-        assertThrows(ResponseStatusException.class, () -> sportService.deleteSport(SPORT_ID));
-
-        verify(sportRepository).findById(anyLong());
-    }
 }

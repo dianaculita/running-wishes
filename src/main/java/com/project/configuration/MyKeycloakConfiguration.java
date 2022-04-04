@@ -45,7 +45,7 @@ public class MyKeycloakConfiguration extends KeycloakWebSecurityConfigurerAdapte
     /**
      * Defining security constraints
      * Automatically authorizing requests for user registration, login and refresh
-     * User participants will have access only on participant creation/update
+     * User participants will have access only on participant creation/update and on any getAll method
      * Admin will have access on every other application logic (competitions, donations etc)
      */
     @Override
@@ -53,12 +53,13 @@ public class MyKeycloakConfiguration extends KeycloakWebSecurityConfigurerAdapte
         super.configure(http);
         http.cors().and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/user/*", "/login", "/refresh").permitAll()
-                .antMatchers("/v3/api-docs/**", "/swagger-ui/**",
-                        "/swagger-ui.html").permitAll()
-                .antMatchers("/participant").hasRole("USER")
-                .antMatchers("/competition/*", "/sport/*", "/sponsor/*", "/donation/*",
-                        "/charity/*", "/association/*", "/participant/*").hasRole("ADMIN")
+                .antMatchers("/user/*", "/login", "/refresh", "/v3/api-docs/**",
+                        "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                .antMatchers("/participant", "/participant/getAll", "/competition/getAll",
+                        "/sport/getAll", "/sponsor/getAll", "charity/getAll",
+                        "/association/getAll").hasRole("USER")
+                .antMatchers("/competition/**", "/sport/**", "/sponsor/**", "/donation/**",
+                        "/charity/**", "/association/**", "/participant/**").hasRole("ADMIN")
                 .anyRequest().authenticated();
     }
 }

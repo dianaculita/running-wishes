@@ -3,6 +3,7 @@ package com.project.services;
 import com.project.converters.ModelToDto;
 import com.project.dtos.CompetitionDto;
 import com.project.models.Competition;
+import com.project.models.Donation;
 import com.project.models.Sport;
 import com.project.repositories.CompetitionRepository;
 import com.project.services.competition.CompetitionServiceImpl;
@@ -15,13 +16,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.ws.rs.BadRequestException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @DataJpaTest
@@ -155,6 +156,7 @@ public class CompetitionServiceTest {
         Competition competition = new Competition();
         competition.setSponsors(new ArrayList<>());
         competition.setDonations(new ArrayList<>());
+        competition.setParticipants(new ArrayList<>());
 
         when(competitionRepository.findById(COMPETITION_ID)).thenReturn(Optional.of(competition));
         when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
@@ -174,6 +176,25 @@ public class CompetitionServiceTest {
         assertThrows(ResponseStatusException.class, () -> competitionService.deleteCompetition(COMPETITION_ID));
 
         verify(competitionRepository).findById(anyLong());
+    }
+
+    @Test
+    public void testDeleteCompetition_shouldThrowBadRequestException() {
+        Competition competition = new Competition();
+        competition.setSponsors(new ArrayList<>());
+        competition.setParticipants(new ArrayList<>());
+        Donation donation = new Donation();
+        competition.setDonations(List.of(donation));
+
+        when(competitionRepository.findById(COMPETITION_ID)).thenReturn(Optional.of(competition));
+        when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> competitionService.deleteCompetition(COMPETITION_ID));
+        assertTrue(exception.getMessage().contains("Competition can not be deleted as donations are in progress!"));
+
+        verify(competitionRepository).findById(anyLong());
+        verify(competitionRepository).save(any(Competition.class));
     }
 
 }

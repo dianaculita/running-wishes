@@ -22,8 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @DataJpaTest
@@ -154,7 +153,9 @@ public class DonationServiceTest {
         when(charityPersonRepository.findAll()).thenReturn(charityPersons);
         when(competitionRepository.getById(COMPETITION_ID)).thenReturn(competition);
 
-        assertThrows(NotEnoughFundsException.class, () -> donationService.createNewDonation(donationDto));
+        RuntimeException exception = assertThrows(NotEnoughFundsException.class,
+                () -> donationService.createNewDonation(donationDto));
+        assertTrue(exception.getMessage().contains("All donation funds are consumed! Donation not possible!"));
 
         verify(charityPersonRepository).findAll();
         verify(competitionRepository).getById(anyLong());

@@ -55,14 +55,4 @@ public class SportController {
         return sportService.createNewSport(sportDto);
     }
 
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Deleted Successfully"),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "403", description = "Forbidden Operation"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-    })
-    @DeleteMapping(value = "/{id}")
-    void deleteSport(@PathVariable Long id) {
-        sportService.deleteSport(id);
-    }
 }

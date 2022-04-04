@@ -76,12 +76,4 @@ public class SportControllerTest {
         verify(sportService).createNewSport(any());
     }
 
-    @Test
-    public void testDeleteSport() {
-        doNothing().when(sportService).deleteSport(SPORT_ID);
-
-        sportController.deleteSport(SPORT_ID);
-
-        verify(sportService).deleteSport(anyLong());
-    }
 }

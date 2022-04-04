@@ -4,6 +4,7 @@ import com.project.converters.DtoToModel;
 import com.project.converters.ModelToDto;
 import com.project.dtos.CompetitionDto;
 import com.project.models.Competition;
+import com.project.models.Participant;
 import com.project.models.Sponsor;
 import com.project.models.Sport;
 import com.project.repositories.CompetitionRepository;
@@ -98,7 +99,9 @@ public class CompetitionServiceImpl implements CompetitionService {
     public void deleteCompetition(Long id) {
         Competition competition = getById(id);
         List<Sponsor> sponsors = competition.getSponsors();
+        List<Participant> participants = competition.getParticipants();
         competition.getSponsors().removeAll(sponsors);
+        competition.getParticipants().removeAll(participants);
         competitionRepository.save(competition);
 
         if (competition.getDonations().size() > 0) {

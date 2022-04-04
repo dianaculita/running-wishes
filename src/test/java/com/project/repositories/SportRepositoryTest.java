@@ -5,13 +5,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 public class SportRepositoryTest {
@@ -52,16 +52,6 @@ public class SportRepositoryTest {
         List<Sport> actualSports = sportRepository.findAll();
 
         assertEquals(expectedSports, actualSports);
-    }
-
-    @Test
-    public void testDelete() {
-        Sport sport = getSportMock("sport");
-        Long sportId = sportRepository.save(sport).getSportId();
-
-        sportRepository.delete(sport);
-
-        assertThrows(JpaObjectRetrievalFailureException.class, () -> sportRepository.getById(sportId));
     }
 
 }
