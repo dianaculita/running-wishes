@@ -2,6 +2,7 @@ package com.project.services.donation;
 
 import com.project.converters.ModelToDto;
 import com.project.dtos.DonationDto;
+import com.project.exceptions.NotEnoughFundsException;
 import com.project.models.CharityPerson;
 import com.project.models.Competition;
 import com.project.models.Donation;
@@ -105,9 +106,11 @@ public class DonationServiceImpl implements DonationService {
                     (-1) * donationAmount);
             return donationAmount;
 
-        } else {
+        } else if (competition.getRaisedMoney() != 0.0) {
             updateCompetitionFundraisingBudget(competition.getCompetitionId(), 0.0);
             return competition.getRaisedMoney();
+        } else {
+            throw new NotEnoughFundsException();
         }
 
     }
