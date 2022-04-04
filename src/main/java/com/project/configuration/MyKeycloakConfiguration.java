@@ -55,9 +55,10 @@ public class MyKeycloakConfiguration extends KeycloakWebSecurityConfigurerAdapte
                 .authorizeRequests()
                 .antMatchers("/user/*", "/login", "/refresh", "/v3/api-docs/**",
                         "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                .antMatchers("/participant", "/participant/getAll", "/competition/getAll",
-                        "/sport/getAll", "/sponsor/getAll", "charity/getAll",
-                        "/association/getAll").hasRole("USER")
+                .antMatchers("/competition/getAll", "/sport/getAll", "/sponsor/getAll",
+                        "/donation/getAll", "/charity/getAll", "/association/getAll",
+                        "/participant/getAll").hasAnyRole("USER", "ADMIN")
+                .antMatchers("/participant").hasRole("USER")
                 .antMatchers("/competition/**", "/sport/**", "/sponsor/**", "/donation/**",
                         "/charity/**", "/association/**", "/participant/**").hasRole("ADMIN")
                 .anyRequest().authenticated();
