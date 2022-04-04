@@ -10,6 +10,8 @@ import com.project.repositories.auth.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -21,6 +23,11 @@ public class UserServiceImpl implements UserService {
     public UserServiceImpl(UserRepository userRepository, KeycloakAdminService keycloakAdminService) {
         this.userRepository = userRepository;
         this.keycloakAdminService = keycloakAdminService;
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     /**
