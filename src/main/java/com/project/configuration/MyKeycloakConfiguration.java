@@ -7,6 +7,7 @@ import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurer
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
@@ -20,6 +21,7 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
  */
 @KeycloakConfiguration
 @Import(KeycloakSpringBootConfigResolver.class)
+@Profile(value = "!integrationTest")
 public class MyKeycloakConfiguration extends KeycloakWebSecurityConfigurerAdapter {
 
     /**
