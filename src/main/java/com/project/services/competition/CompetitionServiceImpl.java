@@ -72,6 +72,7 @@ public class CompetitionServiceImpl implements CompetitionService {
                 .name(competitionDto.getName())
                 .location(competitionDto.getLocation())
                 .numberOfDays(competitionDto.getNumberOfDays())
+                .startDate(competitionDto.getStartDate())
                 .ticketFee(competitionDto.getTicketFee())
                 .raisedMoney(0.0)
                 .sport(getSport(competitionDto))
@@ -94,6 +95,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         competition.setName(competitionDto.getName());
         competition.setLocation(competitionDto.getLocation());
+        competition.setStartDate(competitionDto.getStartDate());
 
         competitionRepository.save(competition);
     }
