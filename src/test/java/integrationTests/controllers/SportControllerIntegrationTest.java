@@ -1,4 +1,4 @@
-package integrationTests;
+package integrationTests.controllers;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @SpringBootTest(classes = ApplicationMain.class)
 @AutoConfigureMockMvc
 @TestPropertySource(
-      locations = "classpath:application-integrationTest.properties"
+      locations = "classpath:application-integrationTest.yml"
 )
 @ActiveProfiles(value = "integrationTest")
 public class SportControllerIntegrationTest {
