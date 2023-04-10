@@ -1,7 +1,7 @@
 package com.project.services.association;
 
-import com.project.converters.ModelToDto;
 import com.project.dtos.AssociationDto;
+import com.project.mappers.AssociationMapper;
 import com.project.models.Association;
 import com.project.models.CharityPerson;
 import com.project.repositories.AssociationRepository;
@@ -25,18 +25,22 @@ public class AssociationServiceImpl implements AssociationService {
 
     private final CharityPersonService charityPersonService;
 
+    private final AssociationMapper associationMapper;
+
     @Autowired
     public AssociationServiceImpl(AssociationRepository associationRepository,
                                   CharityPersonRepository charityPersonRepository,
-                                  CharityPersonService charityPersonService) {
+                                  CharityPersonService charityPersonService,
+                                  AssociationMapper associationMapper) {
         this.associationRepository = associationRepository;
         this.charityPersonRepository = charityPersonRepository;
         this.charityPersonService = charityPersonService;
+        this.associationMapper = associationMapper;
     }
 
     @Override
     public AssociationDto getAssociationById(Long id) {
-        return ModelToDto.associationToDto(getById(id));
+        return associationMapper.associationEntityToDto(getById(id));
     }
 
     private Association getById(Long id) {
@@ -47,7 +51,7 @@ public class AssociationServiceImpl implements AssociationService {
     @Override
     public List<AssociationDto> getAllAssociations() {
         return associationRepository.findAll().stream()
-                .map(ModelToDto::associationToDto)
+                .map(associationMapper::associationEntityToDto)
                 .collect(Collectors.toList());
     }
 

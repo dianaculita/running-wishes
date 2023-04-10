@@ -1,69 +1,87 @@
-package com.project.services;
+package integrationTests.services;
 
-import com.project.converters.ModelToDto;
-import com.project.dtos.ParticipantDto;
-import com.project.exceptions.ParticipantAlreadyEnrolledException;
-import com.project.models.Competition;
-import com.project.models.Participant;
-import com.project.repositories.CompetitionRepository;
-import com.project.repositories.ParticipantRepository;
-import com.project.services.participant.ParticipantServiceImpl;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
-import javax.ws.rs.BadRequestException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import javax.ws.rs.BadRequestException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.project.dtos.ParticipantDto;
+import com.project.exceptions.ParticipantAlreadyEnrolledException;
+import com.project.mappers.ParticipantMapper;
+import com.project.mappers.ParticipantMapperImpl;
+import com.project.models.Competition;
+import com.project.models.Participant;
+import com.project.repositories.CompetitionRepository;
+import com.project.repositories.ParticipantRepository;
+import com.project.services.participant.ParticipantService;
+import com.project.services.participant.ParticipantServiceImpl;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 
-@ExtendWith(MockitoExtension.class)
-public class ParticipantServiceTest {
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {ParticipantMapperImpl.class, ParticipantServiceImpl.class})
+public class ParticipantServiceIntegrationTest {
 
     public static final String CNP = "2980804776699";
     public static final long COMPETITION_ID = 1L;
 
-    @Mock
+    @MockBean
     private ParticipantRepository participantRepository;
 
-    @Mock
+    @MockBean
     private CompetitionRepository competitionRepository;
 
-    @InjectMocks
-    private ParticipantServiceImpl participantService;
+    @SpyBean
+    private ParticipantMapper participantMapper;
+
+    @Autowired
+    private ParticipantService participantService;
 
     @AfterEach
     public void afterEach() {
-        verifyNoMoreInteractions(participantRepository, competitionRepository);
+        verifyNoMoreInteractions(participantRepository, competitionRepository, participantMapper);
     }
 
     @Test
     public void testGetParticipantByCnp() {
         Participant participant = getParticipantMock(CNP, "Ioana");
-        ParticipantDto expectedParticipant = ModelToDto.participantToDto(participant);
 
         when(participantRepository.findByCnp(CNP)).thenReturn(Optional.of(participant));
 
         ParticipantDto actualParticipant = participantService.getParticipantByCnp(CNP);
 
-        verifyAssertions(expectedParticipant, actualParticipant);
+        verifyAssertions(participant.getName(), List.of(COMPETITION_ID), actualParticipant);
 
         verify(participantRepository).findByCnp(anyString());
+        verify(participantMapper).participantEntityToDto(any());
+        verify(participantMapper).extractCompetitions(any());
     }
 
-    private void verifyAssertions(ParticipantDto expectedParticipant, ParticipantDto actualParticipant) {
-        assertEquals(expectedParticipant.getName(), actualParticipant.getName());
-        assertEquals(expectedParticipant.getCompetitionsIds(), actualParticipant.getCompetitionsIds());
+    private void verifyAssertions(String name, List<Long> compIds, ParticipantDto actualParticipant) {
+        assertEquals(name, actualParticipant.getName());
+        assertEquals(compIds, actualParticipant.getCompetitionsIds());
     }
 
     private Participant getParticipantMock(String cnp, String name) {
@@ -101,25 +119,26 @@ public class ParticipantServiceTest {
         Participant participant2 = getParticipantMock("1970804736699", "Daniel");
         List<Participant> participants = Arrays.asList(participant, participant2);
 
-        ParticipantDto participantDto = ModelToDto.participantToDto(participant);
-        ParticipantDto participantDto2 = ModelToDto.participantToDto(participant2);
-        List<ParticipantDto> expectedParticipants = Arrays.asList(participantDto, participantDto2);
-
         when(participantRepository.findAll()).thenReturn(participants);
 
         List<ParticipantDto> actualParticipants = participantService.getAllParticipants();
 
-        assertEquals(expectedParticipants.size(), actualParticipants.size());
-        verifyAssertions(expectedParticipants.get(0), actualParticipants.get(0));
-        verifyAssertions(expectedParticipants.get(1), actualParticipants.get(1));
+        assertEquals(2, actualParticipants.size());
+        verifyAssertions(participant.getName(), List.of(COMPETITION_ID), actualParticipants.get(0));
+        verifyAssertions(participant2.getName(), List.of(COMPETITION_ID), actualParticipants.get(1));
 
         verify(participantRepository).findAll();
+        verify(participantMapper, times(2)).participantEntityToDto(any());
+        verify(participantMapper, times(2)).extractCompetitions(any());
     }
 
     @Test
     public void testCreateNewParticipant() {
         Participant participant = getParticipantMock(CNP, "Ioana");
-        ParticipantDto participantDto = ModelToDto.participantToDto(participant);
+        ParticipantDto participantDto = ParticipantDto.builder()
+              .cnp(CNP)
+              .competitionsIds(List.of(COMPETITION_ID))
+              .build();
 
         Competition competition = participant.getCompetitions().get(0);
 

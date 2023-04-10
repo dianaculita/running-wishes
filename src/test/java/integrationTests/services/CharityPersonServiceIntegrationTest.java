@@ -1,53 +1,73 @@
-package com.project.services;
+package integrationTests.services;
 
-import com.project.converters.ModelToDto;
-import com.project.dtos.CharityPersonDto;
-import com.project.models.Association;
-import com.project.models.CharityPerson;
-import com.project.models.Donation;
-import com.project.repositories.AssociationRepository;
-import com.project.repositories.CharityPersonRepository;
-import com.project.repositories.DonationRepository;
-import com.project.services.charity.CharityPersonServiceImpl;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import com.project.dtos.CharityPersonDto;
+import com.project.mappers.CharityPersonMapper;
+import com.project.mappers.CharityPersonMapperImpl;
+import com.project.models.Association;
+import com.project.models.CharityPerson;
+import com.project.models.Donation;
+import com.project.repositories.AssociationRepository;
+import com.project.repositories.CharityPersonRepository;
+import com.project.repositories.DonationRepository;
+import com.project.services.charity.CharityPersonService;
+import com.project.services.charity.CharityPersonServiceImpl;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 
-@DataJpaTest
-public class CharityPersonServiceTest {
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {CharityPersonMapperImpl.class, CharityPersonServiceImpl.class})
+public class CharityPersonServiceIntegrationTest {
 
     private static final String PERSON_CNP = "5180101253377";
     private static final String PERSON2_CNP = "6180101253277";
     private static final long ASSOCIATION_ID = 100L;
 
-    @Mock
+    @MockBean
     private CharityPersonRepository charityPersonRepository;
 
-    @Mock
+    @MockBean
     private AssociationRepository associationRepository;
 
-    @Mock
+    @MockBean
     private DonationRepository donationRepository;
 
-    @InjectMocks
-    private CharityPersonServiceImpl charityPersonService;
+    @SpyBean
+    private CharityPersonMapper charityPersonMapper;
+
+    @Autowired
+    private CharityPersonService charityPersonService;
 
     @AfterEach
     public void afterEach() {
-        verifyNoMoreInteractions(charityPersonRepository);
+        verifyNoMoreInteractions(charityPersonRepository, charityPersonMapper);
+
+        charityPersonRepository.deleteAll();
     }
 
     @Test
@@ -57,22 +77,22 @@ public class CharityPersonServiceTest {
 
         when(charityPersonRepository.findByPersonCnp(PERSON_CNP)).thenReturn(Optional.ofNullable(charityPerson));
 
-        CharityPersonDto expectedCharityPerson = ModelToDto.charityPersonToDto(charityPerson);
-
         CharityPersonDto actualCharityPerson = charityPersonService.getCharityPersonByCnp(PERSON_CNP);
 
-        verifyAssertions(expectedCharityPerson, actualCharityPerson);
+        verifyAssertions(charityPerson.getAssociation().getAssociationId(), charityPerson.getName(), charityPerson.getStory(),
+              charityPerson.getIban(), charityPerson.getNeededFund(), charityPerson.getRaisedFund(), actualCharityPerson);
 
         verify(charityPersonRepository).findByPersonCnp(anyString());
+        verify(charityPersonMapper).personEntityToDto(any());
     }
 
-    private void verifyAssertions(CharityPersonDto expectedCharityPerson, CharityPersonDto actualCharityPerson) {
-        assertEquals(expectedCharityPerson.getAssociationId(), actualCharityPerson.getAssociationId());
-        assertEquals(expectedCharityPerson.getName(), actualCharityPerson.getName());
-        assertEquals(expectedCharityPerson.getStory(), actualCharityPerson.getStory());
-        assertEquals(expectedCharityPerson.getIban(), actualCharityPerson.getIban());
-        assertEquals(expectedCharityPerson.getNeededFund(), actualCharityPerson.getNeededFund());
-        assertEquals(expectedCharityPerson.getRaisedFund(), actualCharityPerson.getRaisedFund());
+    private void verifyAssertions(Long assocId, String name, String story, Long iban, Double needed, Double raised, CharityPersonDto actualCharityPerson) {
+        assertEquals(assocId, actualCharityPerson.getAssociationId());
+        assertEquals(name, actualCharityPerson.getName());
+        assertEquals(story, actualCharityPerson.getStory());
+        assertEquals(iban, actualCharityPerson.getIban());
+        assertEquals(needed, actualCharityPerson.getNeededFund());
+        assertEquals(raised, actualCharityPerson.getRaisedFund());
     }
 
     private CharityPerson getCharityPersonMock(String name, Long iban, Association association, String cnp) {
@@ -104,20 +124,18 @@ public class CharityPersonServiceTest {
 
         List<CharityPerson> charityPersons = Arrays.asList(charityPerson, charityPerson2);
 
-        CharityPersonDto charityPersonDto = ModelToDto.charityPersonToDto(charityPerson);
-        CharityPersonDto charityPersonDto2 = ModelToDto.charityPersonToDto(charityPerson2);
-
-        List<CharityPersonDto> expectedCharityPersons = Arrays.asList(charityPersonDto, charityPersonDto2);
-
         when(charityPersonRepository.findAll()).thenReturn(charityPersons);
 
         List<CharityPersonDto> actualCharityPeople = charityPersonService.getAllCharityPersons();
 
-        assertEquals(expectedCharityPersons.size(), actualCharityPeople.size());
-        verifyAssertions(expectedCharityPersons.get(0), actualCharityPeople.get(0));
-        verifyAssertions(expectedCharityPersons.get(1), actualCharityPeople.get(1));
+        assertEquals(2, actualCharityPeople.size());
+        verifyAssertions(charityPerson.getAssociation().getAssociationId(), charityPerson.getName(), charityPerson.getStory(),
+              charityPerson.getIban(), charityPerson.getNeededFund(), charityPerson.getRaisedFund(), actualCharityPeople.get(0));
+        verifyAssertions(charityPerson2.getAssociation().getAssociationId(), charityPerson2.getName(), charityPerson2.getStory(),
+              charityPerson2.getIban(), charityPerson2.getNeededFund(), charityPerson2.getRaisedFund(), actualCharityPeople.get(1));
 
         verify(charityPersonRepository).findAll();
+        verify(charityPersonMapper, times(2)).personEntityToDto(any());
     }
 
     @Test
@@ -125,7 +143,12 @@ public class CharityPersonServiceTest {
         Association association = Association.builder().associationId(ASSOCIATION_ID).build();
         association.setCharityPeople(new ArrayList<>());
         CharityPerson charityPerson = getCharityPersonMock("Mike", 1L, association, PERSON_CNP);
-        CharityPersonDto charityPersonDto = ModelToDto.charityPersonToDto(charityPerson);
+        CharityPersonDto charityPersonDto = CharityPersonDto.builder()
+              .name(charityPerson.getName())
+              .iban(charityPerson.getIban())
+              .associationId(ASSOCIATION_ID)
+              .personCnp(PERSON_CNP)
+              .build();
 
         when(associationRepository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(association));
         when(charityPersonRepository.save(any(CharityPerson.class))).thenReturn(charityPerson);
@@ -142,7 +165,11 @@ public class CharityPersonServiceTest {
     public void testUpdateNewCharityPerson() {
         Association association = Association.builder().associationId(ASSOCIATION_ID).build();
         CharityPerson charityPerson = getCharityPersonMock("Mike", 1L, association, PERSON_CNP);
-        CharityPersonDto charityPersonDto = ModelToDto.charityPersonToDto(charityPerson);
+        CharityPersonDto charityPersonDto = CharityPersonDto.builder()
+                                                            .personCnp(PERSON_CNP)
+                                                            .name(charityPerson.getName())
+                                                            .associationId(ASSOCIATION_ID + 1)
+                                                            .build();
 
         when(charityPersonRepository.findByPersonCnp(PERSON_CNP)).thenReturn(Optional.of(charityPerson));
         when(charityPersonRepository.save(any(CharityPerson.class))).thenReturn(charityPerson);
@@ -155,9 +182,7 @@ public class CharityPersonServiceTest {
 
     @Test
     public void testUpdateNewCharityPerson_shouldThrowNotFoundException() {
-        Association association = Association.builder().associationId(ASSOCIATION_ID).build();
-        CharityPerson charityPerson = getCharityPersonMock("Mike", 1L, association, PERSON_CNP);
-        CharityPersonDto charityPersonDto = ModelToDto.charityPersonToDto(charityPerson);
+        CharityPersonDto charityPersonDto = CharityPersonDto.builder().personCnp("someCnp").build();
 
         doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(charityPersonRepository).findByPersonCnp(PERSON_CNP);
 

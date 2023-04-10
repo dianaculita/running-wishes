@@ -1,47 +1,64 @@
-package com.project.services;
+package integrationTests.services;
 
-import com.project.converters.ModelToDto;
-import com.project.dtos.DonationDto;
-import com.project.exceptions.NotEnoughFundsException;
-import com.project.models.CharityPerson;
-import com.project.models.Competition;
-import com.project.models.Donation;
-import com.project.repositories.CharityPersonRepository;
-import com.project.repositories.CompetitionRepository;
-import com.project.repositories.DonationRepository;
-import com.project.services.donation.DonationServiceImpl;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.project.dtos.DonationDto;
+import com.project.exceptions.NotEnoughFundsException;
+import com.project.mappers.DonationMapper;
+import com.project.mappers.DonationMapperImpl;
+import com.project.models.CharityPerson;
+import com.project.models.Competition;
+import com.project.models.Donation;
+import com.project.repositories.CharityPersonRepository;
+import com.project.repositories.CompetitionRepository;
+import com.project.repositories.DonationRepository;
+import com.project.services.donation.DonationService;
+import com.project.services.donation.DonationServiceImpl;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 
-@DataJpaTest
-public class DonationServiceTest {
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {DonationMapperImpl.class, DonationServiceImpl.class})
+public class DonationServiceIntegrationTest {
 
     private static final long DONATION_ID = 100L;
     private static final long COMPETITION_ID = 300L;
 
-    @Mock
+    @MockBean
     private DonationRepository donationRepository;
 
-    @Mock
+    @MockBean
     private CompetitionRepository competitionRepository;
 
-    @Mock
+    @MockBean
     private CharityPersonRepository charityPersonRepository;
 
-    @InjectMocks
-    private DonationServiceImpl donationService;
+    @SpyBean
+    private DonationMapper donationMapper;
+
+    @Autowired
+    private DonationService donationService;
 
     @Test
     public void testGetDonationById() {
@@ -56,17 +73,16 @@ public class DonationServiceTest {
                 .competition(competition)
                 .build();
 
-        DonationDto expectedDonation = ModelToDto.donationToDto(donation);
-
         when(donationRepository.findById(DONATION_ID)).thenReturn(Optional.of(donation));
 
         DonationDto actualDonation = donationService.getDonationById(DONATION_ID);
 
-        assertEquals(expectedDonation.getCompetitionId(), actualDonation.getCompetitionId());
-        assertEquals(expectedDonation.getTotalFunds(), actualDonation.getTotalFunds());
-        assertEquals(expectedDonation.getCharityPersonCnp(), actualDonation.getCharityPersonCnp());
+        assertEquals(COMPETITION_ID, actualDonation.getCompetitionId());
+        assertEquals(donation.getTotalFunds(), actualDonation.getTotalFunds());
+        assertEquals(donation.getCharityPerson().getPersonCnp(), actualDonation.getCharityPersonCnp());
 
         verify(donationRepository).findById(anyLong());
+        verify(donationMapper).donationEntityToDto(any());
     }
 
     private Competition getCompetitionMock(Double budget) {
@@ -112,7 +128,11 @@ public class DonationServiceTest {
                 .charityPerson(charityPerson)
                 .build();
 
-        DonationDto donationDto = ModelToDto.donationToDto(donation);
+        DonationDto donationDto = DonationDto.builder()
+              .competitionId(competition.getCompetitionId())
+              .totalFunds(donationFund)
+              .charityPersonCnp(charityPerson.getPersonCnp())
+              .build();
 
         when(charityPersonRepository.findAll()).thenReturn(charityPersons);
         when(competitionRepository.getById(COMPETITION_ID)).thenReturn(competition);
@@ -142,13 +162,11 @@ public class DonationServiceTest {
 
         List<CharityPerson> charityPersons = Arrays.asList(charityPerson, charityPerson2);
 
-        Donation donation = Donation.builder()
-                .competition(competition)
-                .totalFunds(donationFund)
-                .charityPerson(charityPerson)
-                .build();
-
-        DonationDto donationDto = ModelToDto.donationToDto(donation);
+        DonationDto donationDto = DonationDto.builder()
+              .competitionId(competition.getCompetitionId())
+              .totalFunds(competition.getRaisedMoney())
+              .charityPersonCnp(charityPerson.getPersonCnp())
+              .build();
 
         when(charityPersonRepository.findAll()).thenReturn(charityPersons);
         when(competitionRepository.getById(COMPETITION_ID)).thenReturn(competition);

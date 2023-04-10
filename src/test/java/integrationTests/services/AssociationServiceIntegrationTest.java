@@ -1,71 +1,89 @@
-package com.project.services;
+package integrationTests.services;
 
-import com.project.converters.ModelToDto;
-import com.project.dtos.AssociationDto;
-import com.project.models.Association;
-import com.project.models.CharityPerson;
-import com.project.repositories.AssociationRepository;
-import com.project.repositories.CharityPersonRepository;
-import com.project.services.association.AssociationServiceImpl;
-import com.project.services.charity.CharityPersonService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import com.project.dtos.AssociationDto;
+import com.project.mappers.AssociationMapper;
+import com.project.mappers.AssociationMapperImpl;
+import com.project.models.Association;
+import com.project.models.CharityPerson;
+import com.project.repositories.AssociationRepository;
+import com.project.repositories.CharityPersonRepository;
+import com.project.services.association.AssociationService;
+import com.project.services.association.AssociationServiceImpl;
+import com.project.services.charity.CharityPersonService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 
-@DataJpaTest
-public class AssociationServiceTest {
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {AssociationMapperImpl.class, AssociationServiceImpl.class})
+public class AssociationServiceIntegrationTest {
 
     private static final long ASSOCIATION_ID = 100L;
 
-    @Mock
+    @MockBean
     private AssociationRepository associationRepository;
 
-    @Mock
+    @MockBean
     private CharityPersonRepository charityPersonRepository;
 
-    @Mock
+    @MockBean
     private CharityPersonService charityPersonService;
 
-    @InjectMocks
-    private AssociationServiceImpl associationService;
+    @SpyBean
+    private AssociationMapper associationMapper;
+
+    @Autowired
+    private AssociationService associationService;
 
     @AfterEach
     public void afterEach() {
-        verifyNoMoreInteractions(associationRepository);
+        verifyNoMoreInteractions(associationRepository, charityPersonRepository,
+              charityPersonService, associationMapper);
     }
 
     @Test
     public void testGetAssociationById() {
         Association association = getAssociationMock(ASSOCIATION_ID, "People together");
-        AssociationDto expectedAssociation = ModelToDto.associationToDto(association);
 
         when(associationRepository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(association));
 
         AssociationDto actualAssociation = associationService.getAssociationById(ASSOCIATION_ID);
 
-        verifyAssertions(expectedAssociation, actualAssociation);
+        verifyAssertions(association.getAssociationId(), association.getName(), association.getPurpose(), actualAssociation);
 
         verify(associationRepository).findById(anyLong());
+        verify(associationMapper).associationEntityToDto(any());
     }
 
-    private void verifyAssertions(AssociationDto expectedAssociation, AssociationDto actualAssociation) {
-        assertEquals(expectedAssociation.getAssociationId(), actualAssociation.getAssociationId());
-        assertEquals(expectedAssociation.getName(), actualAssociation.getName());
-        assertEquals(expectedAssociation.getPurpose(), actualAssociation.getPurpose());
+    private void verifyAssertions(Long id, String name, String purpose, AssociationDto actualAssociation) {
+        assertEquals(id, actualAssociation.getAssociationId());
+        assertEquals(name, actualAssociation.getName());
+        assertEquals(purpose, actualAssociation.getPurpose());
     }
 
     private Association getAssociationMock(Long id, String name) {
@@ -93,20 +111,16 @@ public class AssociationServiceTest {
 
         List<Association> associations = Arrays.asList(association, association2);
 
-        AssociationDto associationDto = ModelToDto.associationToDto(association);
-        AssociationDto associationDto2 = ModelToDto.associationToDto(association2);
-
-        List<AssociationDto> expectedAssociations = Arrays.asList(associationDto, associationDto2);
-
         when(associationRepository.findAll()).thenReturn(associations);
 
         List<AssociationDto> actualAssociations = associationService.getAllAssociations();
 
-        assertEquals(expectedAssociations.size(), actualAssociations.size());
-        verifyAssertions(expectedAssociations.get(0), actualAssociations.get(0));
-        verifyAssertions(expectedAssociations.get(1), actualAssociations.get(1));
+        assertEquals(2, actualAssociations.size());
+        verifyAssertions(association.getAssociationId(), association.getName(), association.getPurpose(), actualAssociations.get(0));
+        verifyAssertions(association2.getAssociationId(), association2.getName(), association2.getPurpose(), actualAssociations.get(1));
 
         verify(associationRepository).findAll();
+        verify(associationMapper, times(2)).associationEntityToDto(any());
     }
 
     @Test
@@ -124,13 +138,15 @@ public class AssociationServiceTest {
     @Test
     public void testUpdateAssociation() {
         Association association = getAssociationMock(ASSOCIATION_ID, "People together");
-        AssociationDto associationDto = ModelToDto.associationToDto(association);
-        associationDto.setPurpose("");
 
         when(associationRepository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(association));
         when(associationRepository.save(any(Association.class))).thenReturn(association);
 
-        associationService.updateAssociation(associationDto);
+        associationService.updateAssociation(AssociationDto.builder()
+                                .associationId(ASSOCIATION_ID)
+                                .name(association.getName())
+                                .purpose(association.getPurpose())
+                                .build());
 
         verify(associationRepository).findById(anyLong());
         verify(associationRepository).save(any(Association.class));

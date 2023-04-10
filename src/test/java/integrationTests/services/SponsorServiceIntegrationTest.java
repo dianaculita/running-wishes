@@ -1,8 +1,27 @@
-package com.project.services;
+package integrationTests.services;
 
-import com.project.converters.ModelToDto;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import javax.ws.rs.BadRequestException;
+
 import com.project.dtos.SponsorDto;
 import com.project.exceptions.SponsorAlreadyExistsException;
+import com.project.mappers.SponsorMapper;
+import com.project.mappers.SponsorMapperImpl;
 import com.project.models.Competition;
 import com.project.models.Sponsor;
 import com.project.repositories.CompetitionRepository;
@@ -12,58 +31,54 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.ws.rs.BadRequestException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
-public class SponsorServiceTest {
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {SponsorMapperImpl.class, SponsorServiceImpl.class})
+public class SponsorServiceIntegrationTest {
 
     public static final long SPONSOR_ID = 100L;
 
-    @Mock
+    @MockBean
     private SponsorRepository sponsorRepository;
 
-    @Mock
+    @MockBean
     private CompetitionRepository competitionRepository;
 
-    @InjectMocks
+    @SpyBean
+    private SponsorMapper sponsorMapper;
+
+    @Autowired
     private SponsorServiceImpl sponsorService;
 
     @AfterEach
     public void afterEach() {
-        verifyNoMoreInteractions(sponsorRepository, competitionRepository);
+        verifyNoMoreInteractions(sponsorRepository, competitionRepository, sponsorMapper);
     }
 
     @Test
     public void testGetSponsorById() {
         Sponsor sponsor = getSponsorMock("Pro tv", SPONSOR_ID);
-        SponsorDto expectedSponsor = ModelToDto.sponsorToDto(sponsor);
 
         when(sponsorRepository.findById(SPONSOR_ID)).thenReturn(Optional.ofNullable(sponsor));
 
         SponsorDto actualSponsor = sponsorService.getSponsorById(SPONSOR_ID);
 
-        verifyAssertions(expectedSponsor, actualSponsor);
+        verifyAssertions(sponsor.getSponsoringFunds(), sponsor.getName(), actualSponsor);
 
         verify(sponsorRepository).findById(anyLong());
+        verify(sponsorMapper).sponsorEntityToDto(any());
     }
 
-    private void verifyAssertions(SponsorDto expectedSponsor, SponsorDto actualSponsor) {
-        assertEquals(expectedSponsor.getSponsoringFunds(), actualSponsor.getSponsoringFunds());
-        assertEquals(expectedSponsor.getName(), actualSponsor.getName());
+    private void verifyAssertions(Double funds, String name, SponsorDto actualSponsor) {
+        assertEquals(funds, actualSponsor.getSponsoringFunds());
+        assertEquals(name, actualSponsor.getName());
     }
 
     private Sponsor getSponsorMock(String name, Long id) {
@@ -90,26 +105,27 @@ public class SponsorServiceTest {
         Sponsor sponsor2 = getSponsorMock("Pro", SPONSOR_ID + 1L);
         List<Sponsor> sponsorList = Arrays.asList(sponsor, sponsor2);
 
-        SponsorDto sponsorDto = ModelToDto.sponsorToDto(sponsor);
-        SponsorDto sponsorDto2 = ModelToDto.sponsorToDto(sponsor2);
-        List<SponsorDto> expectedSponsors = Arrays.asList(sponsorDto, sponsorDto2);
-
         when(sponsorRepository.findAll()).thenReturn(sponsorList);
 
         List<SponsorDto> actualSponsors = sponsorService.getAllSponsors();
 
-        assertEquals(expectedSponsors.size(), actualSponsors.size());
-        verifyAssertions(expectedSponsors.get(0), actualSponsors.get(0));
-        verifyAssertions(expectedSponsors.get(1), actualSponsors.get(1));
+        assertEquals(2, actualSponsors.size());
+        verifyAssertions(sponsor.getSponsoringFunds(), sponsor.getName(), actualSponsors.get(0));
+        verifyAssertions(sponsor2.getSponsoringFunds(),sponsor2.getName(), actualSponsors.get(1));
 
         verify(sponsorRepository).findAll();
+        verify(sponsorMapper, times(2)).sponsorEntityToDto(any());
     }
 
     @Test
     public void testCreateNewSponsorWithoutCompetitions() {
         Sponsor sponsor = getSponsorMock("Pro tv", SPONSOR_ID);
         sponsor.setCompetitions(new ArrayList<>());
-        SponsorDto sponsorDto = ModelToDto.sponsorToDto(sponsor);
+        SponsorDto sponsorDto = SponsorDto.builder()
+              .name(sponsor.getName())
+              .sponsorId(SPONSOR_ID)
+              .competitionsIds(List.of())
+              .build();
 
         when(sponsorRepository.save(any(Sponsor.class))).thenReturn(sponsor);
 
@@ -125,7 +141,11 @@ public class SponsorServiceTest {
 
         Sponsor sponsor = getSponsorMock("Pro tv", SPONSOR_ID);
         sponsor.setCompetitions(List.of(competition));
-        SponsorDto sponsorDto = ModelToDto.sponsorToDto(sponsor);
+        SponsorDto sponsorDto = SponsorDto.builder()
+              .name(sponsor.getName())
+              .sponsoringFunds(sponsor.getSponsoringFunds())
+              .competitionsIds(List.of(competitionId))
+              .build();
 
         when(sponsorRepository.save(any(Sponsor.class))).thenReturn(sponsor);
         when(competitionRepository.findById(competitionId)).thenReturn(Optional.of(competition));
@@ -151,7 +171,7 @@ public class SponsorServiceTest {
     public void testCreateNewSponsorWithCompetitions_shouldThrowNotFoundException() {
         Long competitionId = 100L;
         Sponsor sponsor = getSponsorMock("Pro tv", SPONSOR_ID);
-        SponsorDto sponsorDto = ModelToDto.sponsorToDto(sponsor);
+        SponsorDto sponsorDto = SponsorDto.builder().build();
         sponsorDto.setCompetitionsIds(List.of(competitionId));
 
         when(sponsorRepository.save(any(Sponsor.class))).thenReturn(sponsor);
@@ -174,7 +194,12 @@ public class SponsorServiceTest {
         sponsor.setCompetitions(List.of(competition));
         competition.setSponsors(List.of(sponsor));
 
-        SponsorDto sponsorDto = ModelToDto.sponsorToDto(sponsor);
+        SponsorDto sponsorDto = SponsorDto.builder()
+              .sponsorId(SPONSOR_ID)
+              .name(sponsor.getName())
+              .competitionsIds(List.of(competitionId))
+              .sponsoringFunds(sponsor.getSponsoringFunds())
+              .build();
         sponsorDto.setCompetitionsIds(Arrays.asList(competitionId, competitionId2));
 
         when(sponsorRepository.findById(SPONSOR_ID)).thenReturn(Optional.of(sponsor));
@@ -206,7 +231,7 @@ public class SponsorServiceTest {
         competition.setSponsors(List.of(sponsor));
         competition2.setSponsors(List.of(sponsor));
 
-        SponsorDto sponsorDto = ModelToDto.sponsorToDto(sponsor);
+        SponsorDto sponsorDto = SponsorDto.builder().build();
         sponsorDto.setCompetitionsIds(List.of(competitionId2));
 
         when(sponsorRepository.findById(SPONSOR_ID)).thenReturn(Optional.of(sponsor));
@@ -231,8 +256,11 @@ public class SponsorServiceTest {
         Sponsor sponsor = getSponsorMock("Pro tv", SPONSOR_ID);
         sponsor.setCompetitions(List.of(competition));
 
-        SponsorDto sponsorDto = ModelToDto.sponsorToDto(sponsor);
-        sponsorDto.setCompetitionsIds(List.of(competitionId));
+        SponsorDto sponsorDto = SponsorDto.builder()
+              .name(sponsor.getName())
+              .sponsorId(SPONSOR_ID)
+              .competitionsIds(List.of(competitionId))
+              .build();
 
         when(sponsorRepository.findById(SPONSOR_ID)).thenReturn(Optional.of(sponsor));
         when(sponsorRepository.save(any(Sponsor.class))).thenReturn(sponsor);
@@ -249,8 +277,12 @@ public class SponsorServiceTest {
     public void testUpdateSponsor_whenFundIsModified() {
         Sponsor sponsor = getSponsorMock("Pro tv", SPONSOR_ID);
 
-        SponsorDto sponsorDto = ModelToDto.sponsorToDto(sponsor);
-        sponsorDto.setSponsoringFunds(300.0);
+        SponsorDto sponsorDto = SponsorDto.builder()
+              .name(sponsor.getName())
+              .sponsorId(SPONSOR_ID)
+              .sponsoringFunds(300.0)
+              .competitionsIds(List.of())
+              .build();
 
         when(sponsorRepository.findById(SPONSOR_ID)).thenReturn(Optional.of(sponsor));
         when(sponsorRepository.save(any(Sponsor.class))).thenReturn(sponsor);

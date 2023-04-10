@@ -21,5 +21,5 @@ public class AssociationDto {
 
     private String purpose;
 
-    private List<String> charityPersons;
+    private List<CharityPersonDto> charityPersons;
 }

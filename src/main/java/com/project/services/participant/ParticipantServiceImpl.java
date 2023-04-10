@@ -1,8 +1,8 @@
 package com.project.services.participant;
 
-import com.project.converters.ModelToDto;
 import com.project.dtos.ParticipantDto;
 import com.project.exceptions.ParticipantAlreadyEnrolledException;
+import com.project.mappers.ParticipantMapper;
 import com.project.models.Competition;
 import com.project.models.Participant;
 import com.project.repositories.CompetitionRepository;
@@ -23,16 +23,20 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     private final CompetitionRepository competitionRepository;
 
+    private final ParticipantMapper participantMapper;
+
     @Autowired
     public ParticipantServiceImpl(ParticipantRepository participantRepository,
-                                  CompetitionRepository competitionRepository) {
+                                  CompetitionRepository competitionRepository,
+                                  ParticipantMapper participantMapper) {
         this.participantRepository = participantRepository;
         this.competitionRepository = competitionRepository;
+        this.participantMapper = participantMapper;
     }
 
     @Override
     public ParticipantDto getParticipantByCnp(String cnp) {
-        return ModelToDto.participantToDto(getByCnp(cnp));
+        return participantMapper.participantEntityToDto(getByCnp(cnp));
     }
 
     private Participant getByCnp(String cnp) {
@@ -43,7 +47,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     @Override
     public List<ParticipantDto> getAllParticipants() {
         return participantRepository.findAll().stream()
-                .map(ModelToDto::participantToDto)
+                .map(participantMapper::participantEntityToDto)
                 .collect(Collectors.toList());
     }
 
