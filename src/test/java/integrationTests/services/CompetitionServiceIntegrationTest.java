@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.BadRequestException;
@@ -101,6 +102,7 @@ public class CompetitionServiceIntegrationTest {
                                              .competitionId(id)
                                              .name(name)
                                              .ticketFee(100.0)
+                                             .startDate(new Date())
                                              .location("Bucharest")
                                              .sport(sport)
                                              .build();
@@ -144,6 +146,7 @@ public class CompetitionServiceIntegrationTest {
         Competition competition = getCompetitionMock(null, "Run Fest");
         CompetitionDto competitionDto = CompetitionDto.builder()
                                                       .sportId(competition.getSport().getSportId())
+                                                      .startDate(competition.getStartDate())
                                                       .build();
         SportDto sportDto = SportDto.builder()
                                     .sportId(competition.getSport().getSportId())
@@ -167,6 +170,7 @@ public class CompetitionServiceIntegrationTest {
                                                       .competitionId(COMPETITION_ID)
                                                       .name(competition.getName())
                                                       .location(competition.getLocation())
+                                                      .startDate(competition.getStartDate())
                                                       .build();
 
         when(competitionRepository.findById(COMPETITION_ID)).thenReturn(Optional.of(competition));
