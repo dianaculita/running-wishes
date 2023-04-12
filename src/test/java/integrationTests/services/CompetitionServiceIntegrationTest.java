@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -102,7 +103,7 @@ public class CompetitionServiceIntegrationTest {
                                              .competitionId(id)
                                              .name(name)
                                              .ticketFee(100.0)
-                                             .startDate(new Date())
+                                             .startDate(LocalDate.of(2022, 3, 6))
                                              .location("Bucharest")
                                              .sport(sport)
                                              .build();
