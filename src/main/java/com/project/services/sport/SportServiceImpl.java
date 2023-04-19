@@ -1,7 +1,10 @@
 package com.project.services.sport;
 
-import com.project.converters.ModelToDto;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.project.dtos.SportDto;
+import com.project.mappers.SportMapper;
 import com.project.models.Sport;
 import com.project.repositories.SportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,22 +12,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class SportServiceImpl implements SportService {
 
     private final SportRepository sportRepository;
+    private final SportMapper sportMapper;
 
     @Autowired
-    public SportServiceImpl(SportRepository sportRepository) {
+    public SportServiceImpl(SportRepository sportRepository, SportMapper sportMapper) {
         this.sportRepository = sportRepository;
+        this.sportMapper = sportMapper;
     }
 
     @Override
     public SportDto getSportById(Long id) {
-        return ModelToDto.sportToDto(getById(id));
+        return sportMapper.sportEntityToDto(getById(id));
     }
 
     private Sport getById(Long id) {
@@ -35,7 +37,7 @@ public class SportServiceImpl implements SportService {
     @Override
     public List<SportDto> getAllSports() {
         return sportRepository.findAll().stream()
-                .map(ModelToDto::sportToDto)
+                .map(sportMapper::sportEntityToDto)
                 .collect(Collectors.toList());
     }
 

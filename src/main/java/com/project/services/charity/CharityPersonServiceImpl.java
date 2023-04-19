@@ -1,7 +1,7 @@
 package com.project.services.charity;
 
-import com.project.converters.ModelToDto;
 import com.project.dtos.CharityPersonDto;
+import com.project.mappers.CharityPersonMapper;
 import com.project.models.Association;
 import com.project.models.CharityPerson;
 import com.project.models.Donation;
@@ -25,18 +25,22 @@ public class CharityPersonServiceImpl implements CharityPersonService {
 
     private final DonationRepository donationRepository;
 
+    private final CharityPersonMapper charityPersonMapper;
+
     @Autowired
     public CharityPersonServiceImpl(CharityPersonRepository charityPersonRepository,
                                     AssociationRepository associationRepository,
-                                    DonationRepository donationRepository) {
+                                    DonationRepository donationRepository,
+                                    CharityPersonMapper charityPersonMapper) {
         this.charityPersonRepository = charityPersonRepository;
         this.associationRepository = associationRepository;
         this.donationRepository = donationRepository;
+        this.charityPersonMapper = charityPersonMapper;
     }
 
     @Override
     public CharityPersonDto getCharityPersonByCnp(String cnp) {
-        return ModelToDto.charityPersonToDto(getByCnp(cnp));
+        return charityPersonMapper.personEntityToDto(getByCnp(cnp));
     }
 
     private CharityPerson getByCnp(String cnp) {
@@ -47,7 +51,7 @@ public class CharityPersonServiceImpl implements CharityPersonService {
     @Override
     public List<CharityPersonDto> getAllCharityPersons() {
         return charityPersonRepository.findAll().stream()
-                .map(ModelToDto::charityPersonToDto)
+                .map(charityPersonMapper::personEntityToDto)
                 .collect(Collectors.toList());
     }
 

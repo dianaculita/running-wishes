@@ -9,6 +9,7 @@ import com.project.models.User;
 import com.project.repositories.auth.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -16,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 import java.util.Optional;
 
 @Service
+@Profile(value = "!integrationTest")
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationClient authenticationClient;

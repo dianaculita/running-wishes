@@ -1,8 +1,12 @@
 package com.project.services.sponsor;
 
-import com.project.converters.ModelToDto;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.ws.rs.BadRequestException;
+
 import com.project.dtos.SponsorDto;
 import com.project.exceptions.SponsorAlreadyExistsException;
+import com.project.mappers.SponsorMapper;
 import com.project.models.Competition;
 import com.project.models.Sponsor;
 import com.project.repositories.CompetitionRepository;
@@ -12,10 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.ws.rs.BadRequestException;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class SponsorServiceImpl implements SponsorService {
 
@@ -23,16 +23,20 @@ public class SponsorServiceImpl implements SponsorService {
 
     private final CompetitionRepository competitionRepository;
 
+    private final SponsorMapper sponsorMapper;
+
     @Autowired
     public SponsorServiceImpl(SponsorRepository sponsorRepository,
-                              CompetitionRepository competitionRepository) {
+                              CompetitionRepository competitionRepository,
+                              SponsorMapper sponsorMapper) {
         this.sponsorRepository = sponsorRepository;
         this.competitionRepository = competitionRepository;
+        this.sponsorMapper = sponsorMapper;
     }
 
     @Override
     public SponsorDto getSponsorById(Long id) {
-        return ModelToDto.sponsorToDto(getById(id));
+        return sponsorMapper.sponsorEntityToDto(getById(id));
     }
 
     private Sponsor getById(Long id) {
@@ -43,7 +47,7 @@ public class SponsorServiceImpl implements SponsorService {
     @Override
     public List<SponsorDto> getAllSponsors() {
         return sponsorRepository.findAll().stream()
-                .map(ModelToDto::sponsorToDto)
+                .map(sponsorMapper::sponsorEntityToDto)
                 .collect(Collectors.toList());
     }
 

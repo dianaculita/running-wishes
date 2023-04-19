@@ -1,8 +1,8 @@
 package com.project.services.donation;
 
-import com.project.converters.ModelToDto;
 import com.project.dtos.DonationDto;
 import com.project.exceptions.NotEnoughFundsException;
+import com.project.mappers.DonationMapper;
 import com.project.models.CharityPerson;
 import com.project.models.Competition;
 import com.project.models.Donation;
@@ -27,18 +27,22 @@ public class DonationServiceImpl implements DonationService {
 
     private final CharityPersonRepository charityPersonRepository;
 
+    private final DonationMapper donationMapper;
+
     @Autowired
     public DonationServiceImpl(DonationRepository donationRepository,
                                CompetitionRepository competitionRepository,
-                               CharityPersonRepository charityPersonRepository) {
+                               CharityPersonRepository charityPersonRepository,
+                               DonationMapper donationMapper) {
         this.donationRepository = donationRepository;
         this.competitionRepository = competitionRepository;
         this.charityPersonRepository = charityPersonRepository;
+        this.donationMapper = donationMapper;
     }
 
     @Override
     public DonationDto getDonationById(Long id) {
-        return ModelToDto.donationToDto(getById(id));
+        return donationMapper.donationEntityToDto(getById(id));
     }
 
     private Donation getById(Long id) {
@@ -49,7 +53,7 @@ public class DonationServiceImpl implements DonationService {
     @Override
     public List<DonationDto> getAllDonations() {
         return donationRepository.findAll().stream()
-                .map(ModelToDto::donationToDto)
+                .map(donationMapper::donationEntityToDto)
                 .collect(Collectors.toList());
     }
 

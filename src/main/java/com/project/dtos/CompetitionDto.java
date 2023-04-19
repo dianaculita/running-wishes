@@ -1,10 +1,16 @@
 package com.project.dtos;
 
-import lombok.*;
-
+import java.time.LocalDate;
+import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,6 +27,10 @@ public class CompetitionDto {
 
     private Integer numberOfDays;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @NotEmpty
+    private LocalDate startDate;
+
     @NotEmpty
     private String location;
 
@@ -32,7 +42,7 @@ public class CompetitionDto {
 
     private Double raisedMoney;
 
-    private List<String> usersCnp;
+    private List<String> participantsCnp;
 
     private List<String> sponsors;
 }

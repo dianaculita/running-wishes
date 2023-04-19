@@ -1,8 +1,12 @@
 package com.project.services.competition;
 
-import com.project.converters.DtoToModel;
-import com.project.converters.ModelToDto;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.ws.rs.BadRequestException;
+
 import com.project.dtos.CompetitionDto;
+import com.project.mappers.CompetitionMapper;
+import com.project.mappers.SportMapper;
 import com.project.models.Competition;
 import com.project.models.Participant;
 import com.project.models.Sponsor;
@@ -15,10 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.ws.rs.BadRequestException;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class CompetitionServiceImpl implements CompetitionService {
 
@@ -28,18 +28,26 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     private final DonationRepository donationRepository;
 
+    private final CompetitionMapper competitionMapper;
+
+    private final SportMapper sportMapper;
+
     @Autowired
     public CompetitionServiceImpl(CompetitionRepository competitionRepository,
                                   SportService sportService,
-                                  DonationRepository donationRepository) {
+                                  DonationRepository donationRepository,
+                                  CompetitionMapper competitionMapper,
+                                  SportMapper sportMapper) {
         this.competitionRepository = competitionRepository;
         this.sportService = sportService;
         this.donationRepository = donationRepository;
+        this.competitionMapper = competitionMapper;
+        this.sportMapper = sportMapper;
     }
 
     @Override
     public CompetitionDto getCompetitionById(Long id) {
-        return ModelToDto.competitionToDto(getById(id));
+        return competitionMapper.competitionEntityToDto(getById(id));
     }
 
     private Competition getById(Long id) {
@@ -50,7 +58,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     public List<CompetitionDto> getAllCompetitions() {
         return competitionRepository.findAll().stream()
-                .map(ModelToDto::competitionToDto)
+                .map(competitionMapper::competitionEntityToDto)
                 .collect(Collectors.toList());
     }
 
@@ -64,6 +72,7 @@ public class CompetitionServiceImpl implements CompetitionService {
                 .name(competitionDto.getName())
                 .location(competitionDto.getLocation())
                 .numberOfDays(competitionDto.getNumberOfDays())
+                .startDate(competitionDto.getStartDate())
                 .ticketFee(competitionDto.getTicketFee())
                 .raisedMoney(0.0)
                 .sport(getSport(competitionDto))
@@ -73,7 +82,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     private Sport getSport(CompetitionDto competitionDto) {
-        return DtoToModel.fromSportDto(sportService.getSportById(competitionDto.getSportId()));
+        return sportMapper.sportDtoToEntity(sportService.getSportById(competitionDto.getSportId()));
     }
 
     /**
@@ -86,6 +95,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         competition.setName(competitionDto.getName());
         competition.setLocation(competitionDto.getLocation());
+        competition.setStartDate(competitionDto.getStartDate());
 
         competitionRepository.save(competition);
     }
