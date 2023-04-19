@@ -18,7 +18,11 @@ At a competition can be performed only one **sport** and, of course, a sport can
 
 The application can be used by people with two different roles: user or administrator. Taking into consideration the role of the person who logins on the application, one or more actions are allowed within their role. A normal user can only enroll to different sport competitions, in order to help people in need. Also, a user can also see what sports are practiced, what competition exists and their sponsors and also what donations are made to each charity case available, in order to have a perspective of the platform's use. The donations for the charity cases are made by the competitions, each competition being able to make as many donations as the fundraising budget allows. Each action of creating, updating and deleting upon any other entity is permitted only by the administrator.
 
-# Further development
+# April 2023 Updates
+- Added integration tests
+- Added implementation support for map struct mapping between database models and DTOs
+- Added a docker-compose for kafka container
+- Added a startDate field on competition 
+- Added Kafka configuration for consumer from "running-wishes" topic (producer for this topic resides in notify-me service that is responsible for gathering competition ids that are going to start tomorrow and publish them to the topic for runnin-wishes service to read from and notify participants)
 
-As for the moment, the application does not have a front-end interface implemented, and this will be the first goal for the future. Apart from this, it would be beneficial for the community of the application if more payment methods would be available and also integrated within the business logic. 
-At last, as the **Running Wishes charity platform** is an innovative idea, it would be of a very much help for people in need if implemented at a real scale.
+
