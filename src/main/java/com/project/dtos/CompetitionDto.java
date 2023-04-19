@@ -1,13 +1,16 @@
 package com.project.dtos;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
-
+import java.time.LocalDate;
+import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor

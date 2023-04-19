@@ -1,7 +1,7 @@
 # mariadb configuration properties
 spring:
   datasource:
-    url: jdbc:mariadb://localhost:3306/running_wishes
+    url: jdbc:mariadb://localhost:3304/running_wishes
     username: root
     password: mypass
     driver-class-name: org.mariadb.jdbc.Driver
@@ -12,17 +12,27 @@ spring:
 
   # KAFKA config
   kafka:
+    consumer:
+      group-id: custom
+#     the consumers will start reading messages from the earliest one available
+#     when there is no existing offset for that consumer.
+      auto-offset-reset: earliest
     bootstrap-servers: localhost:9092
 
-hibernate:
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  hibernate:
     dialect: org.hibernate.dialect.MySQL5InnoDBDialect
 
 # port on which springboot application is running
 server:
   port: 8090
 
-kafka:
-  topicName: demo
+running-wishes:
+  topic-name: upcomingCompetitions
+#  messages-per-request: 10
 
 # keycloak properties
 keycloak:
